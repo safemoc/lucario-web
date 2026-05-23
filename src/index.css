@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ocean-50: #eaf3fb;
+  --color-ocean-100: #cfe2f3;
+  --color-ocean-200: #a3c6e6;
+  --color-ocean-300: #6ea4d2;
+  --color-ocean-400: #3f82b8;
+  --color-ocean-500: #1f6499;
+  --color-ocean-600: #144d7d;
+  --color-ocean-700: #0e3b63;
+  --color-ocean-800: #0a2b49;
+  --color-ocean-900: #061d33;
+  --color-ocean-950: #03101d;
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", Roboto, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #ffffff;
+  color: var(--color-ocean-900);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+ * 全局柔和滚动条
+ * 默认完全透明 → 悬浮容器时淡淡浮现 → 悬浮滚动条本身时略加深
+ * ============================================================ */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
+  scrollbar-color: rgba(14, 59, 99, 0.22) transparent;
+}
+
+/* WebKit / Blink (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 9999px;
+  transition: background-color 0.25s ease;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(14, 59, 99, 0.18); /* ocean-700 / 18% */
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background-color: rgba(14, 59, 99, 0.42);
+}
+
+/* 暗色侧边栏里的滚动条改用半透明白，避免融在深蓝里看不见 */
+.dark-scroll *:hover::-webkit-scrollbar-thumb,
+.dark-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+.dark-scroll ::-webkit-scrollbar-thumb:hover,
+.dark-scroll ::-webkit-scrollbar-thumb:active {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+.dark-scroll,
+.dark-scroll * {
+  scrollbar-color: transparent transparent;
+}
+.dark-scroll:hover,
+.dark-scroll *:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+@utility perspective-1000 {
+  perspective: 1000px;
+}
+
+@utility preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@utility rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+@utility backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
