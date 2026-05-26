@@ -1,31 +1,12 @@
 import { useMemo, useState } from "react";
-import { Avatar, Card, StatTile, company, department } from "./shared";
+import { Drawer } from "../../components/Drawer";
+import { Modal } from "../../components/Modal";
+import { Skeleton } from "../../components/Skeleton";
+import { useMembers } from "../../hooks/queries";
+import type { Member } from "../../types";
+import { Avatar, Card, StatTile, company, department, statsRow4 } from "./shared";
 
-type MemberStatus = "在职" | "请假" | "出差" | "试用期";
-
-type Member = {
-  id: number;
-  name: string;
-  initials: string;
-  role: string;
-  level: string;
-  joinedAt: string;
-  projects: number;
-  email: string;
-  status: MemberStatus;
-};
-
-const members: Member[] = [
-  { id: 1, name: "林屿", initials: "LY", role: "高级产品设计师", level: "P5", joinedAt: "2024-03-15", projects: 4, email: "linyu@lucario.dev", status: "在职" },
-  { id: 2, name: "张楠", initials: "ZN", role: "视觉设计师", level: "P4", joinedAt: "2024-07-01", projects: 3, email: "zhangnan@lucario.dev", status: "在职" },
-  { id: 3, name: "王诗", initials: "WS", role: "交互设计师", level: "P4", joinedAt: "2024-09-20", projects: 3, email: "wangshi@lucario.dev", status: "出差" },
-  { id: 4, name: "韩冬", initials: "HD", role: "用户研究员", level: "P3", joinedAt: "2025-01-08", projects: 2, email: "handong@lucario.dev", status: "在职" },
-  { id: 5, name: "马宁", initials: "MN", role: "品牌设计师", level: "P4", joinedAt: "2024-05-10", projects: 3, email: "maning@lucario.dev", status: "在职" },
-  { id: 6, name: "高欣", initials: "GX", role: "运营设计师", level: "P3", joinedAt: "2025-03-22", projects: 2, email: "gaoxin@lucario.dev", status: "请假" },
-  { id: 7, name: "陈雨", initials: "CY", role: "设计实习生", level: "P1", joinedAt: "2026-04-05", projects: 1, email: "chenyu@lucario.dev", status: "试用期" },
-  { id: 8, name: "刘星", initials: "LX", role: "动效设计师", level: "P4", joinedAt: "2024-11-12", projects: 2, email: "liuxing@lucario.dev", status: "在职" },
-  { id: 9, name: "苏明", initials: "SM", role: "插画设计师", level: "P3", joinedAt: "2025-06-14", projects: 2, email: "suming@lucario.dev", status: "在职" },
-];
+type MemberStatus = Member["status"];
 
 type DeptEvent = {
   id: number;
@@ -66,8 +47,11 @@ function StatusDot({ s }: { s: MemberStatus }) {
 const filters = ["全部", "在职", "请假", "出差", "试用期"] as const;
 
 export default function Departments() {
+  const { data: members = [], isLoading } = useMembers();
   const [filter, setFilter] = useState<(typeof filters)[number]>("全部");
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<Member | null>(null);
+  const [resumeOpen, setResumeOpen] = useState(false);
 
   const visible = useMemo(() => {
     return members.filter((m) => {
@@ -75,12 +59,20 @@ export default function Departments() {
       if (query && !`${m.name}${m.role}${m.email}`.includes(query)) return false;
       return true;
     });
-  }, [filter, query]);
+  }, [filter, query, members]);
+
+  if (isLoading) {
+    return (
+      <div className="grid h-full grid-cols-12 gap-3">
+        <Skeleton className="col-span-12 h-16" />
+        <Skeleton className="col-span-8 h-full" />
+      </div>
+    );
+  }
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-12 grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)] gap-3 lg:gap-4">
-      {/* Row 1 stats */}
-      <div className="col-span-12 grid grid-cols-4 gap-3 lg:gap-4">
+    <div className="flex flex-col gap-3 lg:grid lg:h-full lg:min-h-0 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
+      <div className={`${statsRow4} lg:col-span-12`}>
         <StatTile label="部门人数" value={department.members} hint="设计部" tone="ocean" />
         <StatTile label="在研项目" value={department.ongoingProjects} hint="2 项即将延期" tone="amber" />
         <StatTile
@@ -98,7 +90,7 @@ export default function Departments() {
       </div>
 
       {/* Row 2: 成员列表 + 部门概览 */}
-      <div className="col-span-8 row-span-2 min-h-0">
+      <div className="min-h-[320px] lg:col-span-8 lg:row-span-2 lg:min-h-0">
         <Card
           title="部门成员"
           subtitle={`${department.name} · ${visible.length} / ${members.length} 人`}
@@ -132,8 +124,8 @@ export default function Departments() {
               </button>
             ))}
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-            <table className="w-full text-sm">
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto pr-1">
+            <table className="w-full min-w-[520px] text-sm">
               <thead className="sticky top-0 z-10 bg-white text-left text-xs text-slate-400">
                 <tr>
                   <th className="pb-1.5 pr-2 font-normal">成员</th>
@@ -181,7 +173,11 @@ export default function Departments() {
                       </span>
                     </td>
                     <td className="py-1.5 text-right">
-                      <button className="text-xs text-ocean-700 hover:text-ocean-900">
+                      <button
+                        type="button"
+                        onClick={() => setSelected(m)}
+                        className="text-xs text-ocean-700 hover:text-ocean-900"
+                      >
                         详情
                       </button>
                     </td>
@@ -204,7 +200,7 @@ export default function Departments() {
       </div>
 
       {/* Row 2 right: 部门概览 */}
-      <div className="col-span-4 row-span-1 min-h-0">
+      <div className="min-h-[240px] lg:col-span-4 lg:row-span-1 lg:min-h-0">
         <Card
           title="部门概览"
           subtitle={`负责人 ${department.head}`}
@@ -254,7 +250,7 @@ export default function Departments() {
 
           <div className="rounded-xl bg-slate-50 p-2.5">
             <div className="text-xs text-slate-500">公司中的位置</div>
-            <div className="mt-1.5 grid grid-cols-5 gap-1">
+            <div className="mt-1.5 grid grid-cols-3 gap-1 sm:grid-cols-5">
               {company.departments.map((d) => (
                 <div
                   key={d.name}
@@ -281,7 +277,7 @@ export default function Departments() {
       </div>
 
       {/* Row 3 right: 招聘 + 动态 */}
-      <div className="col-span-4 row-span-1 min-h-0">
+      <div className="min-h-[200px] lg:col-span-4 lg:row-span-1 lg:min-h-0">
         <Card
           title="招聘进度"
           subtitle={`${recruit.length} 个开放岗位`}
@@ -316,7 +312,11 @@ export default function Departments() {
                     {r.id} · 开放 {r.days} 天 · {r.applicants} 份简历
                   </div>
                 </div>
-                <button className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:border-ocean-300 hover:text-ocean-700">
+                <button
+                  type="button"
+                  onClick={() => setResumeOpen(true)}
+                  className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:border-ocean-300 hover:text-ocean-700"
+                >
                   看简历
                 </button>
               </div>
@@ -326,7 +326,7 @@ export default function Departments() {
       </div>
 
       {/* Row 3 left wide: 部门动态 */}
-      <div className="col-span-8 row-span-1 min-h-0">
+      <div className="min-h-[200px] lg:col-span-8 lg:row-span-1 lg:min-h-0">
         <Card
           title="部门动态"
           subtitle="最近 30 天"
@@ -365,6 +365,46 @@ export default function Departments() {
           </ol>
         </Card>
       </div>
+
+      <Drawer
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        title={selected?.name ?? ""}
+      >
+        {selected && (
+          <div className="space-y-3 text-sm">
+            <p className="text-slate-500">{selected.role}</p>
+            <p>
+              <span className="text-slate-400">邮箱</span> {selected.email}
+            </p>
+            <p>
+              <span className="text-slate-400">负责项目</span> {selected.projects} 项
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {(selected.skills ?? ["Figma", "设计系统", "用户研究"]).map((s) => (
+                <span
+                  key={s}
+                  className="rounded-full bg-ocean-50 px-2 py-0.5 text-xs text-ocean-700"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </Drawer>
+
+      <Modal
+        open={resumeOpen}
+        onClose={() => setResumeOpen(false)}
+        title="候选人简历"
+      >
+        <ul className="space-y-2 text-sm">
+          <li className="rounded-lg border p-2">李明 · 8 年交互经验 · 作品集链接</li>
+          <li className="rounded-lg border p-2">赵雪 · 5 年用研经验 · 已通过初试</li>
+          <li className="rounded-lg border p-2">周航 · 3 年品牌设计 · 待安排面试</li>
+        </ul>
+      </Modal>
     </div>
   );
 }

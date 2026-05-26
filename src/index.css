@@ -32,6 +32,28 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+html[data-density="compact"] {
+  --card-pad: 1rem;
+  --grid-gap: 0.75rem;
+}
+
+html[data-density="comfortable"] {
+  --card-pad: 1.25rem;
+  --grid-gap: 1rem;
+}
+
+/* 避免窄屏多列 grid 把中文挤成竖排 */
+@media (max-width: 1023px) {
+  main {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* ============================================================
  * 全局柔和滚动条
  * 默认完全透明 → 悬浮容器时淡淡浮现 → 悬浮滚动条本身时略加深

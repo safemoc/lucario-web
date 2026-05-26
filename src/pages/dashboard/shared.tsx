@@ -1,154 +1,26 @@
 import { useMemo, type ReactNode } from "react";
 
-/* ============================================================
- * 类型
- * ============================================================ */
+export type {
+  Priority,
+  ProjectStatus,
+  Project,
+  Todo,
+  Request,
+  SocialPost,
+} from "../../types";
 
-export type Priority = "high" | "medium" | "low";
+export {
+  user,
+  company,
+  department,
+  projects,
+  initialTodos,
+  requests,
+  socialPosts,
+  weekWorkHours,
+} from "../../data/mock";
 
-export type ProjectStatus = "进行中" | "即将延期" | "即将完成" | "已完成";
-
-export type Project = {
-  id: string;
-  name: string;
-  progress: number;
-  status: ProjectStatus;
-  due: string;
-  team: string[];
-};
-
-export type Todo = {
-  id: number;
-  text: string;
-  priority: Priority;
-  due: string;
-  done: boolean;
-};
-
-export type Request = {
-  id: number;
-  from: string;
-  avatar: string;
-  dept: string;
-  title: string;
-  time: string;
-  priority: Priority;
-};
-
-export type SocialPost = {
-  id: number;
-  author: string;
-  avatar: string;
-  time: string;
-  topic: string;
-  content: string;
-  reactions: number;
-  comments: number;
-  accent: string;
-};
-
-/* ============================================================
- * 共享 Mock 数据
- * ============================================================ */
-
-export const user = {
-  name: "林屿",
-  role: "高级产品设计师",
-  level: "P5",
-  department: "设计部",
-  employeeId: "LU-2026-0087",
-  joinedAt: "2024-03-15",
-  email: "linyu@lucario.dev",
-  phone: "+86 138 0000 8888",
-  avatarInitials: "LY",
-  monthWorkHours: { used: 132, total: 168 },
-  metrics: { assets: 4, projects: 4, todos: 7, requests: 3 },
-};
-
-export const company = {
-  ceo: { name: "陈博", title: "CEO" },
-  departments: [
-    { name: "产品部", head: "周岚", count: 18, color: "bg-indigo-500" },
-    {
-      name: "设计部",
-      head: "林屿",
-      count: 9,
-      color: "bg-ocean-500",
-      mine: true,
-    },
-    { name: "工程部", head: "高骏", count: 32, color: "bg-emerald-500" },
-    { name: "运营部", head: "苏婉", count: 14, color: "bg-amber-500" },
-    { name: "市场部", head: "梁辉", count: 11, color: "bg-rose-500" },
-  ],
-};
-
-export const department = {
-  name: "设计部",
-  head: "林屿",
-  members: 9,
-  ongoingProjects: 6,
-  managedAssets: 24,
-  weeklyDelivered: 11,
-  vacancies: 2,
-};
-
-export const projects: Project[] = [
-  {
-    id: "P-201",
-    name: "Lucario 2.0 设计系统",
-    progress: 72,
-    status: "进行中",
-    due: "2026-06-18",
-    team: ["LY", "ZN", "WS"],
-  },
-  {
-    id: "P-188",
-    name: "客户门户改版",
-    progress: 45,
-    status: "即将延期",
-    due: "2026-05-30",
-    team: ["LY", "GX"],
-  },
-  {
-    id: "P-176",
-    name: "移动端图标重制",
-    progress: 95,
-    status: "即将完成",
-    due: "2026-05-28",
-    team: ["LY"],
-  },
-  {
-    id: "P-152",
-    name: "品牌 VI 升级",
-    progress: 100,
-    status: "已完成",
-    due: "2026-05-10",
-    team: ["LY", "MN", "ZN"],
-  },
-];
-
-export const initialTodos: Todo[] = [
-  { id: 1, text: "完成 Lucario 2.0 登录页评审", priority: "high", due: "今天 18:00", done: false },
-  { id: 2, text: "回复客户门户的反馈意见", priority: "medium", due: "明天", done: false },
-  { id: 3, text: "提交 5 月份资产盘点表", priority: "medium", due: "周五", done: false },
-  { id: 4, text: "约工程部对齐组件库进度", priority: "low", due: "下周", done: false },
-  { id: 5, text: "整理品牌 VI 交付物", priority: "low", due: "已完成", done: true },
-];
-
-export const requests: Request[] = [
-  { id: 1, from: "周岚", avatar: "ZL", dept: "产品部", title: "协助评审新版需求文档", time: "10 分钟前", priority: "high" },
-  { id: 2, from: "高骏", avatar: "GJ", dept: "工程部", title: "借用评审会议室 (周四下午)", time: "1 小时前", priority: "medium" },
-  { id: 3, from: "苏婉", avatar: "SW", dept: "运营部", title: "618 活动落地页排期协调", time: "今天 09:20", priority: "medium" },
-];
-
-export const socialPosts: SocialPost[] = [
-  { id: 1, author: "周岚", avatar: "ZL", time: "20 分钟前", topic: "团建合照", content: "今天去了海边，浪漫值拉满～大家拍了好多美照，待会儿发群里。", reactions: 24, comments: 6, accent: "bg-ocean-500" },
-  { id: 2, author: "高骏", avatar: "GJ", time: "1 小时前", topic: "新工位", content: "欢迎大家来工程部串门，咖啡免费！", reactions: 17, comments: 3, accent: "bg-emerald-500" },
-  { id: 3, author: "苏婉", avatar: "SW", time: "今天 11:32", topic: "618 上线", content: "大促物料已经全部上线，辛苦各位～", reactions: 31, comments: 9, accent: "bg-amber-500" },
-  { id: 4, author: "梁辉", avatar: "LH", time: "今天 09:15", topic: "内训招募", content: "新一期主题：高效协作，欢迎报名！", reactions: 12, comments: 2, accent: "bg-rose-500" },
-  { id: 5, author: "陈博", avatar: "CB", time: "昨天", topic: "Q2 总结", content: "感谢全员的努力，OKR 超额完成。", reactions: 58, comments: 14, accent: "bg-indigo-500" },
-  { id: 6, author: "Lucario", avatar: "LU", time: "昨天", topic: "新功能", content: "资产借还流程升级，欢迎使用反馈。", reactions: 9, comments: 4, accent: "bg-fuchsia-500" },
-];
+import type { Priority, ProjectStatus } from "../../types";
 
 /* ============================================================
  * 共享 UI 组件
@@ -234,18 +106,18 @@ export function Card({
 }) {
   return (
     <section
-      className={`relative flex h-full min-h-0 flex-col rounded-2xl border border-slate-200/70 bg-white p-4 shadow-[0_8px_24px_-12px_rgba(6,29,51,0.12)] transition hover:shadow-[0_14px_32px_-16px_rgba(6,29,51,0.2)] ${className}`}
+      className={`relative flex h-full min-h-0 flex-col rounded-2xl border border-slate-200/70 bg-white p-4 shadow-[0_8px_24px_-12px_rgba(6,29,51,0.12)] transition hover:shadow-[0_14px_32px_-16px_rgba(6,29,51,0.2)] dark:border-slate-700 dark:bg-slate-900 dark:shadow-none ${className}`}
     >
-      <header className="mb-3 flex shrink-0 items-center justify-between gap-2">
+      <header className="mb-3 flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h3 className="truncate text-base font-semibold text-ocean-950">
+          <h3 className="text-base font-semibold text-ocean-950 dark:text-white">
             {title}
           </h3>
           {subtitle && (
-            <p className="mt-0.5 truncate text-xs text-slate-400">{subtitle}</p>
+            <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>
           )}
         </div>
-        {action && <div className="shrink-0">{action}</div>}
+        {action && <div className="shrink-0 sm:max-w-[55%]">{action}</div>}
       </header>
       <div className={`min-h-0 flex-1 ${bodyClassName}`}>{children}</div>
     </section>
@@ -279,17 +151,25 @@ export function StatTile({
     <div
       className={`relative flex flex-col rounded-xl bg-gradient-to-br p-3 ring-1 ${toneMap[tone]}`}
     >
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-slate-500">{label}</span>
-        {icon && <span className="opacity-70">{icon}</span>}
+      <div className="flex items-center justify-between gap-1">
+        <span className="text-xs leading-snug text-slate-500">{label}</span>
+        {icon && <span className="shrink-0 opacity-70">{icon}</span>}
       </div>
-      <div className="mt-1 text-2xl font-bold leading-tight">{value}</div>
+      <div className="mt-1 text-xl font-bold leading-tight sm:text-2xl">{value}</div>
       {hint && (
-        <div className="mt-0.5 text-[11px] text-slate-400">{hint}</div>
+        <div className="mt-0.5 text-[11px] leading-snug text-slate-400">{hint}</div>
       )}
     </div>
   );
 }
+
+/** 顶部统计条：手机 2 列，平板 4 列 */
+export const statsRow4 =
+  "grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3";
+
+/** 顶部统计条：手机 2 列，中屏 3 列，桌面 5 列 */
+export const statsRow5 =
+  "grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 lg:gap-3";
 
 /* 简单的页面页头：可放在每个 tab 主区顶部 */
 export function PageHeader({

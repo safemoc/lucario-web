@@ -1,4 +1,24 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+} from "recharts";
+import { toast } from "sonner";
+import { Skeleton } from "../../components/Skeleton";
+import {
+  useBatchApproveRequests,
+  useHandleRequest,
+  useProjects,
+  useRequests,
+  useSocial,
+  useToggleTodo,
+  useTodos,
+  useUser,
+} from "../../hooks/queries";
 import {
   Avatar,
   Card,
@@ -6,15 +26,15 @@ import {
   StatusBadge,
   company,
   department,
-  initialTodos,
-  projects,
-  requests,
-  socialPosts,
-  user,
-  type Todo,
+  weekWorkHours,
 } from "./shared";
 
 function AccountCard() {
+  const navigate = useNavigate();
+  const { data: user, isLoading } = useUser();
+  if (isLoading || !user) {
+    return <Card title="我的账户" subtitle="加载中"><Skeleton className="h-32 w-full" /></Card>;
+  }
   const pct = Math.round(
     (user.monthWorkHours.used / user.monthWorkHours.total) * 100,
   );
@@ -53,7 +73,11 @@ function AccountCard() {
       title="我的账户"
       subtitle={dateStr}
       action={
-        <button className="text-xs text-ocean-700 hover:text-ocean-900">
+        <button
+          type="button"
+          onClick={() => navigate("/settings")}
+          className="text-xs text-ocean-700 hover:text-ocean-900"
+        >
           编辑资料
         </button>
       }
@@ -108,7 +132,17 @@ function AccountCard() {
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-4 gap-2">
+      <div className="mt-3 h-16">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={weekWorkHours} margin={{ top: 0, right: 0, left: -28, bottom: 0 }}>
+            <XAxis dataKey="day" tick={{ fontSize: 9 }} stroke="#94a3b8" />
+            <Tooltip contentStyle={{ fontSize: 11 }} />
+            <Bar dataKey="hours" fill="#0e3b63" radius={[3, 3, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {[
           { label: "资产", value: user.metrics.assets, color: "text-ocean-700" },
           { label: "项目", value: user.metrics.projects, color: "text-emerald-600" },
@@ -131,7 +165,8 @@ function AccountCard() {
 }
 
 function TodosCard() {
-  const [todos, setTodos] = useState<Todo[]>(initialTodos);
+  const { data: todos = [], isLoading } = useTodos();
+  const toggle = useToggleTodo();
   const remaining = todos.filter((t) => !t.done).length;
   return (
     <Card
@@ -144,6 +179,9 @@ function TodosCard() {
       }
       bodyClassName="overflow-y-auto pr-1"
     >
+      {isLoading ? (
+        <Skeleton className="h-24 w-full" />
+      ) : (
       <ul className="space-y-1">
         {todos.map((t) => (
           <li
@@ -152,13 +190,7 @@ function TodosCard() {
           >
             <button
               type="button"
-              onClick={() =>
-                setTodos((prev) =>
-                  prev.map((x) =>
-                    x.id === t.id ? { ...x, done: !x.done } : x,
-                  ),
-                )
-              }
+              onClick={() => toggle.mutate(t.id)}
               className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
                 t.done
                   ? "border-ocean-700 bg-ocean-700 text-white"
@@ -196,26 +228,40 @@ function TodosCard() {
           </li>
         ))}
       </ul>
+      )}
     </Card>
   );
 }
 
 function RequestsCard() {
-  const [list, setList] = useState(requests);
-  const handleAct = (id: number) =>
-    setList((prev) => prev.filter((r) => r.id !== id));
+  const { data: list = [], isLoading } = useRequests();
+  const handleAct = useHandleRequest();
+  const batch = useBatchApproveRequests();
   return (
     <Card
       title="协调申请"
       subtitle={`${list.length} 条待处理`}
       action={
-        <button className="text-xs text-ocean-700 hover:text-ocean-900">
-          全部
-        </button>
+        list.length > 0 ? (
+          <button
+            type="button"
+            onClick={() =>
+              batch.mutate(
+                list.map((r) => r.id),
+                { onSuccess: () => toast.success("已全部同意") },
+              )
+            }
+            className="text-xs text-ocean-700 hover:text-ocean-900"
+          >
+            全部同意
+          </button>
+        ) : null
       }
       bodyClassName="overflow-y-auto pr-1"
     >
-      {list.length === 0 ? (
+      {isLoading ? (
+        <Skeleton className="h-24 w-full" />
+      ) : list.length === 0 ? (
         <div className="flex h-full flex-col items-center justify-center text-center text-sm text-slate-400">
           <svg
             className="mb-2 h-10 w-10 text-slate-300"
@@ -253,13 +299,23 @@ function RequestsCard() {
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <button
-                    onClick={() => handleAct(r.id)}
+                    type="button"
+                    onClick={() =>
+                      handleAct.mutate(r.id, {
+                        onSuccess: () => toast.success("已同意"),
+                      })
+                    }
                     className="rounded-md bg-ocean-900 px-2 py-1 text-xs font-medium text-white transition hover:bg-ocean-800"
                   >
                     同意
                   </button>
                   <button
-                    onClick={() => handleAct(r.id)}
+                    type="button"
+                    onClick={() =>
+                      handleAct.mutate(r.id, {
+                        onSuccess: () => toast.info("已拒绝"),
+                      })
+                    }
                     className="rounded-md border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-white"
                   >
                     拒绝
@@ -299,7 +355,7 @@ function CompanyStructureCard() {
         <div className="my-1.5 h-4 w-px bg-slate-300" />
         <div className="relative h-px w-full bg-slate-200" />
 
-        <div className="grid w-full grid-cols-5 gap-2 pt-2">
+        <div className="grid w-full grid-cols-3 gap-2 pt-2 sm:grid-cols-5">
           {company.departments.map((d) => (
             <div key={d.name} className="flex flex-col items-center">
               <div className="-mt-2 h-2 w-px bg-slate-300" />
@@ -343,7 +399,7 @@ function CompanyStructureCard() {
             运转良好
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[
             { label: "部门人数", value: department.members },
             { label: "在研项目", value: department.ongoingProjects },
@@ -385,6 +441,7 @@ function CompanyStructureCard() {
 }
 
 function ProjectsCard() {
+  const { data: projects = [], isLoading } = useProjects();
   return (
     <Card
       title="管理的项目"
@@ -396,6 +453,9 @@ function ProjectsCard() {
       }
       bodyClassName="overflow-y-auto pr-1"
     >
+      {isLoading ? (
+        <Skeleton className="h-24 w-full" />
+      ) : (
       <ul className="space-y-2">
         {projects.map((p) => (
           <li
@@ -441,11 +501,13 @@ function ProjectsCard() {
           </li>
         ))}
       </ul>
+      )}
     </Card>
   );
 }
 
 function SocialCard() {
+  const { data: socialPosts = [] } = useSocial();
   const [activeId, setActiveId] = useState<number | null>(null);
   const active = socialPosts.find((p) => p.id === activeId) ?? null;
 
@@ -454,7 +516,11 @@ function SocialCard() {
       title="社交圈"
       subtitle={`${socialPosts.length} 条同事动态`}
       action={
-        <button className="text-xs text-ocean-700 hover:text-ocean-900">
+        <button
+          type="button"
+          onClick={() => window.location.assign("/social")}
+          className="text-xs text-ocean-700 hover:text-ocean-900"
+        >
           进入社交圈 →
         </button>
       }
@@ -572,24 +638,24 @@ function SocialCard() {
 
 export default function Home() {
   return (
-    <div className="grid h-full min-h-0 grid-cols-12 grid-rows-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(0,1fr)] gap-3 lg:gap-4">
-      <div className="col-span-4 row-span-1 min-h-0">
+    <div className="flex flex-col gap-3 lg:grid lg:h-full lg:min-h-0 lg:grid-cols-12 lg:grid-rows-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
+      <div className="min-h-[220px] shrink-0 lg:col-span-4 lg:row-span-1 lg:min-h-0">
         <AccountCard />
       </div>
-      <div className="col-span-4 row-span-1 min-h-0">
+      <div className="min-h-[200px] shrink-0 lg:col-span-4 lg:row-span-1 lg:min-h-0">
         <TodosCard />
       </div>
-      <div className="col-span-4 row-span-1 min-h-0">
+      <div className="min-h-[200px] shrink-0 lg:col-span-4 lg:row-span-1 lg:min-h-0">
         <RequestsCard />
       </div>
 
-      <div className="col-span-8 row-span-1 min-h-0">
+      <div className="min-h-[240px] shrink-0 lg:col-span-8 lg:row-span-1 lg:min-h-0">
         <CompanyStructureCard />
       </div>
-      <div className="col-span-4 row-span-2 min-h-0">
+      <div className="min-h-[320px] shrink-0 lg:col-span-4 lg:row-span-2 lg:min-h-0">
         <SocialCard />
       </div>
-      <div className="col-span-8 row-span-1 min-h-0">
+      <div className="min-h-[220px] shrink-0 lg:col-span-8 lg:row-span-1 lg:min-h-0">
         <ProjectsCard />
       </div>
     </div>

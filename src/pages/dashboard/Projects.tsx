@@ -1,95 +1,29 @@
-import { useMemo, useState } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import { useMemo, useState, type ReactNode } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { toast } from "sonner";
+import { Drawer } from "../../components/Drawer";
+import { Skeleton } from "../../components/Skeleton";
+import { useProjects, useUpdateProjectStatus } from "../../hooks/queries";
 import {
   Avatar,
   Card,
   StatTile,
   StatusBadge,
-  projects as basicProjects,
+  statsRow5,
   type Project,
   type ProjectStatus,
 } from "./shared";
-
-type DetailProject = Project & {
-  description: string;
-  priority: "高" | "中" | "低";
-  budget: { used: number; total: number };
-  tasks: { done: number; total: number };
-  category: string;
-};
-
-const projects: DetailProject[] = [
-  {
-    ...basicProjects[0],
-    description: "面向 B 端管理后台的统一设计语言与组件库",
-    priority: "高",
-    budget: { used: 56, total: 80 },
-    tasks: { done: 38, total: 52 },
-    category: "设计系统",
-  },
-  {
-    ...basicProjects[1],
-    description: "改造客户自助门户体验、降低 30% 工单量",
-    priority: "高",
-    budget: { used: 42, total: 60 },
-    tasks: { done: 18, total: 41 },
-    category: "客户体验",
-  },
-  {
-    ...basicProjects[2],
-    description: "iOS / Android 双平台图标体系迭代",
-    priority: "中",
-    budget: { used: 18, total: 20 },
-    tasks: { done: 22, total: 23 },
-    category: "移动端",
-  },
-  {
-    ...basicProjects[3],
-    description: "公司新一轮品牌视觉升级",
-    priority: "中",
-    budget: { used: 30, total: 30 },
-    tasks: { done: 25, total: 25 },
-    category: "品牌",
-  },
-  {
-    id: "P-220",
-    name: "618 大促主会场",
-    progress: 30,
-    status: "进行中",
-    due: "2026-06-05",
-    team: ["MN", "GX"],
-    description: "618 大促主会场视觉与互动",
-    priority: "高",
-    budget: { used: 12, total: 40 },
-    tasks: { done: 6, total: 20 },
-    category: "运营",
-  },
-  {
-    id: "P-198",
-    name: "用户调研报告 Q2",
-    progress: 60,
-    status: "进行中",
-    due: "2026-06-12",
-    team: ["HD", "WS"],
-    description: "Q2 季度核心用户深度访谈与分析",
-    priority: "中",
-    budget: { used: 8, total: 16 },
-    tasks: { done: 7, total: 12 },
-    category: "用研",
-  },
-  {
-    id: "P-141",
-    name: "登录与权限重构",
-    progress: 100,
-    status: "已完成",
-    due: "2026-04-22",
-    team: ["LY", "WS"],
-    description: "SSO + 多角色权限控制",
-    priority: "高",
-    budget: { used: 22, total: 22 },
-    tasks: { done: 18, total: 18 },
-    category: "基础平台",
-  },
-];
 
 const statuses: ProjectStatus[] = ["进行中", "即将延期", "即将完成", "已完成"];
 
@@ -107,44 +41,78 @@ const statusMeta: Record<
   },
 };
 
-function ProjectKanbanCard({ p }: { p: DetailProject }) {
+const PIE_COLORS = ["#0e3b63", "#f43f5e", "#f59e0b", "#10b981"];
+
+function DraggableProject({
+  p,
+  onClick,
+}: {
+  p: Project;
+  onClick?: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({ id: p.id });
+  const style = transform
+    ? { transform: CSS.Translate.toString(transform) }
+    : undefined;
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={isDragging ? "opacity-40" : ""}
+    >
+      <ProjectKanbanCard p={p} onClick={onClick} />
+    </div>
+  );
+}
+
+function DroppableColumn({
+  status,
+  children,
+}: {
+  status: ProjectStatus;
+  children: ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: status });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 ${isOver ? "rounded-lg ring-2 ring-ocean-400/60" : ""}`}
+      data-status={status}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ProjectKanbanCard({
+  p,
+  onClick,
+}: {
+  p: Project;
+  onClick?: () => void;
+}) {
   const meta = statusMeta[p.status];
   return (
-    <div className="cursor-pointer rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-md">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="truncate text-sm font-semibold text-ocean-950">
-              {p.name}
-            </span>
-          </div>
-          <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-slate-400">
-            <span>{p.id}</span>
-            <span>· {p.category}</span>
-          </div>
-        </div>
-        <span
-          className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
-            p.priority === "高"
-              ? "bg-rose-100 text-rose-700"
-              : p.priority === "中"
-                ? "bg-amber-100 text-amber-700"
-                : "bg-slate-100 text-slate-600"
-          }`}
-        >
-          {p.priority}
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => e.key === "Enter" && onClick?.()}
+      className="cursor-grab rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm transition hover:border-ocean-200 hover:shadow-md active:cursor-grabbing dark:border-slate-700 dark:bg-slate-800"
+    >
+      <div className="flex items-center gap-1.5">
+        <span className="truncate text-sm font-semibold text-ocean-950 dark:text-white">
+          {p.name}
         </span>
+        <StatusBadge status={p.status} />
       </div>
-
-      <p className="mt-1.5 line-clamp-2 text-xs text-slate-500">
-        {p.description}
+      <p className="mt-1 text-[10px] text-slate-400">
+        {p.id} · 截止 {p.due}
       </p>
-
       <div className="mt-2">
-        <div className="mb-0.5 flex items-center justify-between text-[10px] text-slate-400">
-          <span>进度</span>
-          <span className="font-medium text-ocean-900">{p.progress}%</span>
-        </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
           <div
             className={`h-full rounded-full ${meta.bar}`}
@@ -152,35 +120,36 @@ function ProjectKanbanCard({ p }: { p: DetailProject }) {
           />
         </div>
       </div>
-
-      <div className="mt-2 flex items-center justify-between">
-        <div className="flex -space-x-2">
-          {p.team.map((t) => (
-            <Avatar key={t} initials={t} size="sm" />
-          ))}
-        </div>
-        <span className="text-[10px] text-slate-500">截止 {p.due}</span>
+      <div className="mt-2 flex -space-x-2">
+        {p.team.map((t) => (
+          <Avatar key={t} initials={t} size="sm" />
+        ))}
       </div>
     </div>
   );
 }
 
 export default function Projects() {
+  const { data: projects = [], isLoading } = useProjects();
+  const updateStatus = useUpdateProjectStatus();
   const [query, setQuery] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState<"全部" | "高" | "中" | "低">(
-    "全部",
+  const [view, setView] = useState<"board" | "list">("board");
+  const [selected, setSelected] = useState<Project | null>(null);
+  const [activeDrag, setActiveDrag] = useState<Project | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
   const filtered = useMemo(() => {
     return projects.filter((p) => {
-      if (priorityFilter !== "全部" && p.priority !== priorityFilter) return false;
-      if (query && !`${p.name}${p.id}${p.category}`.includes(query)) return false;
+      if (query && !`${p.name}${p.id}`.includes(query)) return false;
       return true;
     });
-  }, [priorityFilter, query]);
+  }, [projects, query]);
 
   const grouped = useMemo(() => {
-    const g: Record<ProjectStatus, DetailProject[]> = {
+    const g: Record<ProjectStatus, Project[]> = {
       进行中: [],
       即将延期: [],
       即将完成: [],
@@ -190,123 +159,204 @@ export default function Projects() {
     return g;
   }, [filtered]);
 
-  const totalProgress = Math.round(
-    filtered.reduce((s, p) => s + p.progress, 0) /
-      Math.max(filtered.length, 1),
-  );
+  const pieData = statuses.map((s, i) => ({
+    name: s,
+    value: grouped[s].length,
+    fill: PIE_COLORS[i],
+  }));
+
+  const onDragEnd = (e: DragEndEvent) => {
+    setActiveDrag(null);
+    const projectId = e.active.id as string;
+    const newStatus = e.over?.id as ProjectStatus | undefined;
+    if (!newStatus || !statuses.includes(newStatus)) return;
+    const p = projects.find((x) => x.id === projectId);
+    if (!p || p.status === newStatus) return;
+    updateStatus.mutate(
+      { id: projectId, status: newStatus },
+      { onSuccess: () => toast.success(`已移至「${newStatus}」`) },
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid h-full grid-cols-12 gap-3">
+        <Skeleton className="col-span-12 h-20" />
+        <Skeleton className="col-span-12 h-full" />
+      </div>
+    );
+  }
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-12 grid-rows-[auto_minmax(0,1fr)] gap-3 lg:gap-4">
-      {/* Row 1: stats */}
-      <div className="col-span-12 grid grid-cols-5 gap-3 lg:gap-4">
-        <StatTile
-          label="进行中"
-          value={grouped.进行中.length}
-          hint={`整体进度 ${totalProgress}%`}
-          tone="ocean"
-        />
-        <StatTile
-          label="即将延期"
-          value={grouped.即将延期.length}
-          hint="需要重点关注"
-          tone="rose"
-        />
-        <StatTile
-          label="即将完成"
-          value={grouped.即将完成.length}
-          hint="本周可交付"
-          tone="amber"
-        />
-        <StatTile
-          label="本季完成"
-          value={grouped.已完成.length}
-          hint="按时率 92%"
-          tone="emerald"
-        />
+    <div className="flex flex-col gap-3 lg:grid lg:h-full lg:min-h-0 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:gap-4">
+      <div className={`${statsRow5} lg:col-span-12`}>
+        {statuses.map((s, i) => (
+          <StatTile
+            key={s}
+            label={s}
+            value={grouped[s].length}
+            tone={(["ocean", "rose", "amber", "emerald"] as const)[i]}
+          />
+        ))}
         <StatTile label="项目总数" value={filtered.length} tone="indigo" />
       </div>
 
-      {/* Row 2: Kanban */}
-      <div className="col-span-12 row-span-1 min-h-0">
+      <div className="min-h-[400px] flex-1 lg:col-span-12 lg:row-span-1 lg:min-h-0">
         <Card
           title="项目看板"
-          subtitle="按状态分组 · 拖拽排序"
+          subtitle="拖拽卡片可变更状态"
           action={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="搜索项目名 / 编号..."
-                className="w-40 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-ocean-500 focus:ring-2 focus:ring-ocean-500/15"
+                placeholder="搜索..."
+                className="w-full min-w-[120px] rounded-md border border-slate-200 px-2 py-1 text-xs outline-none focus:border-ocean-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white sm:w-32"
               />
-              <div className="flex rounded-md bg-slate-100 p-0.5 text-[11px] text-slate-500">
-                {(["全部", "高", "中", "低"] as const).map((p) => (
+              <div className="flex rounded-md bg-slate-100 p-0.5 text-[11px] dark:bg-slate-800">
+                {(["board", "list"] as const).map((v) => (
                   <button
-                    key={p}
-                    onClick={() => setPriorityFilter(p)}
-                    className={`rounded px-2 py-0.5 transition ${
-                      priorityFilter === p
-                        ? "bg-white font-medium text-ocean-900 shadow-sm"
-                        : "hover:text-ocean-700"
+                    key={v}
+                    type="button"
+                    onClick={() => setView(v)}
+                    className={`rounded px-2 py-0.5 ${
+                      view === v
+                        ? "bg-white font-medium shadow-sm dark:bg-slate-700"
+                        : ""
                     }`}
                   >
-                    {p}
+                    {v === "board" ? "看板" : "列表"}
                   </button>
                 ))}
               </div>
-              <button className="rounded-lg bg-ocean-900 px-3 py-1 text-xs font-medium text-white transition hover:bg-ocean-800">
-                + 新项目
-              </button>
             </div>
           }
           bodyClassName="overflow-hidden"
         >
-          <div className="grid h-full min-h-0 grid-cols-4 gap-3">
-            {statuses.map((s) => {
-              const list = grouped[s];
-              const meta = statusMeta[s];
-              return (
-                <div
-                  key={s}
-                  className={`flex min-h-0 flex-col rounded-xl ${meta.soft} p-2`}
+          <div className="mb-3 h-24">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={28}
+                  outerRadius={40}
                 >
-                  <div className="mb-2 flex shrink-0 items-center justify-between px-1">
-                    <div className="flex items-center gap-2">
-                      <StatusBadge status={s} />
-                      <span className={`text-xs font-medium ${meta.head}`}>
-                        {list.length}
-                      </span>
-                    </div>
-                    <button className="rounded p-0.5 text-slate-500 hover:bg-white/60">
-                      <svg
-                        className="h-3.5 w-3.5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
-                    {list.map((p) => (
-                      <ProjectKanbanCard key={p.id} p={p} />
-                    ))}
-                    {list.length === 0 && (
-                      <div className="rounded-lg border border-dashed border-slate-200 bg-white/60 py-6 text-center text-[11px] text-slate-400">
-                        暂无项目
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                  {pieData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
+
+          {view === "list" ? (
+            <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto">
+              <table className="w-full min-w-[480px] text-sm">
+                <thead className="text-left text-xs text-slate-400">
+                  <tr>
+                    <th className="pb-2">项目</th>
+                    <th>状态</th>
+                    <th>进度</th>
+                    <th>截止</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((p) => (
+                    <tr
+                      key={p.id}
+                      className="cursor-pointer border-t border-slate-100 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+                      onClick={() => setSelected(p)}
+                    >
+                      <td className="py-2 font-medium text-ocean-950 dark:text-white">
+                        {p.name}
+                      </td>
+                      <td>
+                        <StatusBadge status={p.status} />
+                      </td>
+                      <td>{p.progress}%</td>
+                      <td className="text-slate-500">{p.due}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              onDragStart={(e) => {
+                const p = projects.find((x) => x.id === e.active.id);
+                setActiveDrag(p ?? null);
+              }}
+              onDragEnd={onDragEnd}
+            >
+              <div className="flex h-full min-h-0 gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
+                {statuses.map((s) => {
+                  const list = grouped[s];
+                  const meta = statusMeta[s];
+                  return (
+                    <div
+                      key={s}
+                      id={s}
+                      className={`flex min-h-[280px] w-[min(100%,280px)] shrink-0 flex-col rounded-xl sm:w-[260px] lg:min-h-0 lg:w-auto lg:shrink ${meta.soft} p-2 dark:bg-opacity-20`}
+                    >
+                      <div className="mb-2 flex items-center gap-2 px-1">
+                        <StatusBadge status={s} />
+                        <span className="text-xs">{list.length}</span>
+                      </div>
+                      <DroppableColumn status={s}>
+                        {list.map((p) => (
+                          <DraggableProject
+                            key={p.id}
+                            p={p}
+                            onClick={() => setSelected(p)}
+                          />
+                        ))}
+                      </DroppableColumn>
+                    </div>
+                  );
+                })}
+              </div>
+              <DragOverlay>
+                {activeDrag ? <ProjectKanbanCard p={activeDrag} /> : null}
+              </DragOverlay>
+            </DndContext>
+          )}
         </Card>
       </div>
+
+      <Drawer
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        title={selected?.name ?? ""}
+      >
+        {selected && (
+          <div className="space-y-3 text-sm">
+            <p className="text-slate-500">{selected.description ?? "暂无描述"}</p>
+            <div>
+              <StatusBadge status={selected.status} />
+              <span className="ml-2 text-slate-500">进度 {selected.progress}%</span>
+            </div>
+            <div>
+              <div className="text-xs text-slate-400">团队成员</div>
+              <div className="mt-1 flex -space-x-2">
+                {selected.team.map((t) => (
+                  <Avatar key={t} initials={t} size="sm" />
+                ))}
+              </div>
+            </div>
+            <ul className="space-y-1 text-xs text-slate-600">
+              <li>□ 完成需求评审</li>
+              <li>□ 交付设计稿 v2</li>
+              <li>□ 开发联调验收</li>
+            </ul>
+          </div>
+        )}
+      </Drawer>
     </div>
   );
 }

@@ -1,5 +1,12 @@
-import { useState, type ReactNode } from "react";
-import { Avatar, Card, user } from "./shared";
+import { useEffect, useState, type ReactNode } from "react";
+import { toast } from "sonner";
+import { useUpdateUser, useUser } from "../../hooks/queries";
+import {
+  usePreferencesStore,
+  type Density,
+  type ThemeMode,
+} from "../../stores/preferences";
+import { Avatar, Card } from "./shared";
 
 type SectionKey =
   | "profile"
@@ -69,13 +76,29 @@ function Field({
 }
 
 function ProfileSection() {
+  const { data: user } = useUser();
+  const updateUser = useUpdateUser();
+  const [name, setName] = useState(user?.name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [bio, setBio] = useState(user?.bio ?? "");
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
+      setBio(user.bio ?? "");
+    }
+  }, [user]);
+
+  if (!user) return null;
+
   return (
-    <div className="grid h-full min-h-0 grid-cols-12 gap-3">
-      <div className="col-span-5 min-h-0">
-        <div className="flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-gradient-to-br from-ocean-50 to-white p-5">
+    <div className="flex flex-col gap-3 lg:grid lg:h-full lg:grid-cols-12">
+      <div className="lg:col-span-5 lg:min-h-0">
+        <div className="flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-gradient-to-br from-ocean-50 to-white p-5 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
           <Avatar initials={user.avatarInitials} size="xl" className="ring-4 ring-white" />
           <div className="text-center">
-            <div className="text-base font-semibold text-ocean-950">
+            <div className="text-base font-semibold text-ocean-950 dark:text-white">
               {user.name}
             </div>
             <div className="mt-0.5 text-xs text-slate-500">
@@ -89,19 +112,29 @@ function ProfileSection() {
             <button className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-ocean-300 hover:text-ocean-700">
               更换头像
             </button>
-            <button className="rounded-lg bg-ocean-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-ocean-800">
+            <button
+              type="button"
+              onClick={() =>
+                updateUser.mutate(
+                  { name, email, bio },
+                  { onSuccess: () => toast.success("资料已保存") },
+                )
+              }
+              className="rounded-lg bg-ocean-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-ocean-800"
+            >
               保存修改
             </button>
           </div>
         </div>
       </div>
 
-      <div className="col-span-7 min-h-0 overflow-y-auto pr-1">
-        <div className="grid grid-cols-2 gap-3">
+      <div className="lg:col-span-7 lg:min-h-0 lg:overflow-y-auto lg:pr-1">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="姓名">
             <input
-              defaultValue={user.name}
-              className="w-44 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm outline-none focus:border-ocean-500 focus:ring-2 focus:ring-ocean-500/15"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-44 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm outline-none focus:border-ocean-500 focus:ring-2 focus:ring-ocean-500/15 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
           </Field>
           <Field label="工号">
@@ -113,8 +146,9 @@ function ProfileSection() {
           </Field>
           <Field label="邮箱">
             <input
-              defaultValue={user.email}
-              className="w-44 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm outline-none focus:border-ocean-500 focus:ring-2 focus:ring-ocean-500/15"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-44 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm outline-none focus:border-ocean-500 focus:ring-2 focus:ring-ocean-500/15 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
           </Field>
           <Field label="手机">
@@ -141,8 +175,9 @@ function ProfileSection() {
         <div className="mt-2 px-1">
           <div className="text-sm font-medium text-ocean-900">个人简介</div>
           <textarea
-            defaultValue="负责 Lucario 设计系统与客户门户改版。喜欢极简、温暖的设计语言。"
-            className="mt-1 h-20 w-full resize-none rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm outline-none focus:border-ocean-500 focus:ring-2 focus:ring-ocean-500/15"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            className="mt-1 h-20 w-full resize-none rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm outline-none focus:border-ocean-500 focus:ring-2 focus:ring-ocean-500/15 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
           />
         </div>
       </div>
@@ -153,7 +188,7 @@ function ProfileSection() {
 function AccountSection() {
   const [tfa, setTfa] = useState(true);
   return (
-    <div className="grid h-full min-h-0 grid-cols-2 gap-3 overflow-y-auto pr-1">
+    <div className="grid grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2 lg:h-full lg:min-h-0">
       <div className="rounded-2xl border border-slate-100 bg-slate-50/40 p-3">
         <div className="text-sm font-medium text-ocean-900">登录密码</div>
         <p className="mt-0.5 text-[11px] text-slate-400">
@@ -218,6 +253,7 @@ function AccountSection() {
 }
 
 function NotificationSection() {
+  const { data: user } = useUser();
   const [s, setS] = useState({
     email: true,
     inapp: true,
@@ -229,11 +265,11 @@ function NotificationSection() {
   });
   const flip = (k: keyof typeof s) => setS((x) => ({ ...x, [k]: !x[k] }));
   return (
-    <div className="grid h-full min-h-0 grid-cols-2 gap-3 overflow-y-auto pr-1">
+    <div className="grid grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2 lg:h-full lg:min-h-0">
       <div className="rounded-2xl border border-slate-100 bg-slate-50/40 p-3">
         <div className="text-sm font-medium text-ocean-900">通知渠道</div>
         <div className="mt-1 space-y-1">
-          <Field label="邮件通知" hint={user.email}>
+          <Field label="邮件通知" hint={user?.email ?? "—"}>
             <Switch checked={s.email} onChange={() => flip("email")} />
           </Field>
           <Field label="站内提醒" hint="顶部铃铛红点">
@@ -266,9 +302,12 @@ function NotificationSection() {
 }
 
 function AppearanceSection() {
-  const [theme, setTheme] = useState<"light" | "dark" | "auto">("light");
-  const [accent, setAccent] = useState<"ocean" | "emerald" | "fuchsia" | "amber" | "indigo">("ocean");
-  const [density, setDensity] = useState<"comfortable" | "compact">("compact");
+  const theme = usePreferencesStore((s) => s.theme);
+  const setTheme = usePreferencesStore((s) => s.setTheme);
+  const accent = usePreferencesStore((s) => s.accent);
+  const setAccent = usePreferencesStore((s) => s.setAccent);
+  const density = usePreferencesStore((s) => s.density);
+  const setDensity = usePreferencesStore((s) => s.setDensity);
   const [lang, setLang] = useState<"zh-CN" | "en-US">("zh-CN");
 
   const accents = [
@@ -280,14 +319,14 @@ function AppearanceSection() {
   ] as const;
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-2 gap-3 overflow-y-auto pr-1">
+    <div className="grid grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2 lg:h-full lg:min-h-0">
       <div className="rounded-2xl border border-slate-100 bg-slate-50/40 p-3">
         <div className="text-sm font-medium text-ocean-900">主题</div>
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
           {(["light", "dark", "auto"] as const).map((t) => (
             <button
               key={t}
-              onClick={() => setTheme(t)}
+              onClick={() => setTheme(t as ThemeMode)}
               className={`flex flex-col items-center gap-1 rounded-xl border p-2 transition ${
                 theme === t
                   ? "border-ocean-500 ring-2 ring-ocean-500/20"
@@ -327,11 +366,14 @@ function AppearanceSection() {
 
       <div className="rounded-2xl border border-slate-100 bg-slate-50/40 p-3">
         <div className="text-sm font-medium text-ocean-900">显示密度</div>
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {(["comfortable", "compact"] as const).map((d) => (
             <button
               key={d}
-              onClick={() => setDensity(d)}
+              onClick={() => {
+                setDensity(d as Density);
+                toast.success(d === "compact" ? "已切换为紧凑模式" : "已切换为舒适模式");
+              }}
               className={`rounded-lg border px-2 py-2 text-left transition ${
                 density === d
                   ? "border-ocean-500 ring-2 ring-ocean-500/20"
@@ -377,7 +419,7 @@ function AppearanceSection() {
 }
 
 function IntegrationsSection() {
-  const list = [
+  const initial = [
     { name: "Figma", desc: "设计稿同步与评审", connected: true, color: "bg-fuchsia-500", icon: "✏️" },
     { name: "GitHub", desc: "工程文档与代码片段", connected: true, color: "bg-slate-800", icon: "⌥" },
     { name: "Slack", desc: "通知与协作", connected: false, color: "bg-rose-500", icon: "💬" },
@@ -385,8 +427,19 @@ function IntegrationsSection() {
     { name: "Notion", desc: "知识库同步", connected: true, color: "bg-slate-700", icon: "📓" },
     { name: "Jira", desc: "项目任务集成", connected: false, color: "bg-ocean-600", icon: "🧩" },
   ];
+  const [list, setList] = useState(initial);
+  const toggle = (name: string) => {
+    setList((prev) =>
+      prev.map((i) => {
+        if (i.name !== name) return i;
+        const next = !i.connected;
+        toast.success(next ? `已连接 ${name}` : `已断开 ${name}`);
+        return { ...i, connected: next };
+      }),
+    );
+  };
   return (
-    <div className="grid h-full min-h-0 grid-cols-3 gap-3 overflow-y-auto pr-1">
+    <div className="grid grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3 lg:h-full lg:min-h-0">
       {list.map((i) => (
         <div
           key={i.name}
@@ -408,6 +461,8 @@ function IntegrationsSection() {
             </div>
           </div>
           <button
+            type="button"
+            onClick={() => toggle(i.name)}
             className={`mt-2.5 w-full rounded-md py-1 text-xs font-medium transition ${
               i.connected
                 ? "border border-slate-200 text-slate-600 hover:border-rose-300 hover:text-rose-600"
@@ -424,7 +479,7 @@ function IntegrationsSection() {
 
 function DangerSection() {
   return (
-    <div className="grid h-full min-h-0 grid-cols-2 gap-3 overflow-y-auto pr-1">
+    <div className="grid grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2 lg:h-full lg:min-h-0">
       <div className="rounded-2xl border border-amber-200 bg-amber-50/40 p-3">
         <div className="text-sm font-medium text-amber-800">导出我的数据</div>
         <p className="mt-0.5 text-[11px] text-amber-700">
@@ -452,17 +507,17 @@ export default function Settings() {
   const current = sections.find((s) => s.key === active)!;
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-12 gap-3 lg:gap-4">
-      <div className="col-span-3 min-h-0">
-        <Card title="设置" subtitle="管理你的工作空间" bodyClassName="overflow-y-auto pr-1">
-          <ul className="space-y-1">
+    <div className="flex flex-col gap-3 lg:grid lg:h-full lg:min-h-0 lg:grid-cols-12 lg:gap-4">
+      <div className="shrink-0 lg:col-span-3 lg:min-h-0">
+        <Card title="设置" subtitle="管理你的工作空间" bodyClassName="overflow-x-auto lg:overflow-y-auto lg:pr-1">
+          <ul className="flex gap-2 lg:flex-col lg:gap-1">
             {sections.map((s) => {
               const a = s.key === active;
               return (
                 <li key={s.key}>
                   <button
                     onClick={() => setActive(s.key)}
-                    className={`flex w-full items-start gap-2.5 rounded-lg px-2 py-2 text-left transition ${
+                    className={`flex w-full min-w-[140px] shrink-0 items-start gap-2.5 rounded-lg px-2 py-2 text-left transition lg:min-w-0 ${
                       a
                         ? "bg-ocean-50 ring-1 ring-ocean-100"
                         : "hover:bg-slate-50"
@@ -489,7 +544,7 @@ export default function Settings() {
         </Card>
       </div>
 
-      <div className="col-span-9 min-h-0">
+      <div className="min-h-[400px] flex-1 lg:col-span-9 lg:min-h-0">
         <Card
           title={current.label}
           subtitle={current.desc}
