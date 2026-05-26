@@ -13,9 +13,10 @@ import { Avatar, Card, StatTile, statsRow4 } from "./shared";
 const categories = [
   { key: "all", name: "全部文档", icon: "📚" },
   { key: "设计规范", name: "设计规范", icon: "🎨" },
-  { key: "入职指南", name: "入职指南", icon: "🚀" },
+  { key: "项目文档", name: "项目文档", icon: "📝" },
   { key: "工程实践", name: "工程实践", icon: "🛠️" },
-  { key: "产品文档", name: "产品文档", icon: "📝" },
+  { key: "安全规范", name: "安全规范", icon: "🛡️" },
+  { key: "入职指南", name: "入职指南", icon: "🚀" },
 ];
 
 export default function Knowledge() {

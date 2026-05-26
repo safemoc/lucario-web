@@ -30,6 +30,7 @@ npm run dev
 | `/projects` | 项目管理 |
 | `/knowledge` | 知识库 |
 | `/social` | 社交圈 |
+| `/agent` | AI 助手 |
 | `/settings` | 设置 |
 
 快捷键：`Ctrl/Cmd + K` 打开全局搜索。

@@ -17,16 +17,16 @@ type DeptEvent = {
 };
 
 const events: DeptEvent[] = [
-  { id: 1, type: "项目", title: "Lucario 2.0 设计系统进入 Beta 阶段", time: "今天 10:24", by: "林屿" },
-  { id: 2, type: "招聘", title: "新增 2 个岗位：交互设计师 (P5)、用研 (P4)", time: "昨天", by: "HR 苏婉" },
-  { id: 3, type: "公告", title: "5 月 25 日全员设计 Workshop", time: "5 月 20 日", by: "林屿" },
-  { id: 4, type: "里程碑", title: "品牌 VI 升级项目正式交付", time: "5 月 10 日", by: "马宁" },
-  { id: 5, type: "项目", title: "客户门户改版评审通过 v2", time: "5 月 8 日", by: "王诗" },
+  { id: 1, type: "项目", title: "项目协同中台进入 Beta 阶段", time: "今天 10:24", by: "林屿" },
+  { id: 2, type: "招聘", title: "新增 2 个岗位：AI 应用工程师、平台后端", time: "昨天", by: "HR 苏婉" },
+  { id: 3, type: "公告", title: "权限模型与审计日志方案评审", time: "5 月 20 日", by: "林屿" },
+  { id: 4, type: "里程碑", title: "人员组织与权限模型正式交付", time: "5 月 10 日", by: "马宁" },
+  { id: 5, type: "项目", title: "资产资源台账字段评审通过 v2", time: "5 月 8 日", by: "王诗" },
 ];
 
 const recruit = [
-  { id: "J-21", title: "高级交互设计师", level: "P5", urgent: true, applicants: 12, days: 8 },
-  { id: "J-22", title: "用户研究员", level: "P4", urgent: false, applicants: 7, days: 15 },
+  { id: "J-21", title: "AI 应用工程师", level: "P5", urgent: true, applicants: 12, days: 8 },
+  { id: "J-22", title: "平台后端工程师", level: "P4", urgent: false, applicants: 7, days: 15 },
 ];
 
 function StatusDot({ s }: { s: MemberStatus }) {
@@ -400,9 +400,9 @@ export default function Departments() {
         title="候选人简历"
       >
         <ul className="space-y-2 text-sm">
-          <li className="rounded-lg border p-2">李明 · 8 年交互经验 · 作品集链接</li>
-          <li className="rounded-lg border p-2">赵雪 · 5 年用研经验 · 已通过初试</li>
-          <li className="rounded-lg border p-2">周航 · 3 年品牌设计 · 待安排面试</li>
+          <li className="rounded-lg border p-2">李明 · 6 年 Rust / Axum 经验 · 已通过初试</li>
+          <li className="rounded-lg border p-2">赵雪 · 4 年 AI Agent 应用经验 · 待技术面</li>
+          <li className="rounded-lg border p-2">周航 · 5 年平台产品经验 · 待安排面试</li>
         </ul>
       </Modal>
     </div>

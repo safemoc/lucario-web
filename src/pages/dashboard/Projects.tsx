@@ -43,6 +43,60 @@ const statusMeta: Record<
 
 const PIE_COLORS = ["#0e3b63", "#f43f5e", "#f59e0b", "#10b981"];
 
+const projectRelations: Record<
+  string,
+  {
+    requirements: number;
+    bugs: number;
+    docs: string;
+    repo: string;
+    env: string;
+  }
+> = {
+  "P-201": {
+    requirements: 18,
+    bugs: 4,
+    docs: "项目协同中台 PRD v2.1",
+    repo: "lucario-web",
+    env: "staging-web",
+  },
+  "P-188": {
+    requirements: 14,
+    bugs: 7,
+    docs: "资产资源台账字段表",
+    repo: "lucario-assets",
+    env: "asset-dev",
+  },
+  "P-176": {
+    requirements: 9,
+    bugs: 2,
+    docs: "内部动态治理说明",
+    repo: "lucario-social",
+    env: "social-beta",
+  },
+  "P-152": {
+    requirements: 12,
+    bugs: 0,
+    docs: "权限模型评审纪要",
+    repo: "lucario-auth",
+    env: "auth-prod",
+  },
+  "P-220": {
+    requirements: 16,
+    bugs: 5,
+    docs: "Agent 操作边界草案",
+    repo: "lucario-agent",
+    env: "agent-lab",
+  },
+  "P-198": {
+    requirements: 10,
+    bugs: 3,
+    docs: "协同开发资源联动方案",
+    repo: "lucario-devops",
+    env: "ci-runner-02",
+  },
+};
+
 function DraggableProject({
   p,
   onClick,
@@ -110,7 +164,7 @@ function ProjectKanbanCard({
         <StatusBadge status={p.status} />
       </div>
       <p className="mt-1 text-[10px] text-slate-400">
-        {p.id} · 截止 {p.due}
+        {p.id} · {p.category ?? "项目"} · 截止 {p.due}
       </p>
       <div className="mt-2">
         <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
@@ -177,6 +231,8 @@ export default function Projects() {
       { onSuccess: () => toast.success(`已移至「${newStatus}」`) },
     );
   };
+
+  const selectedRelation = selected ? projectRelations[selected.id] : undefined;
 
   if (isLoading) {
     return (
@@ -339,8 +395,38 @@ export default function Projects() {
             <p className="text-slate-500">{selected.description ?? "暂无描述"}</p>
             <div>
               <StatusBadge status={selected.status} />
-              <span className="ml-2 text-slate-500">进度 {selected.progress}%</span>
+              <span className="ml-2 text-slate-500">
+                {selected.category} · 进度 {selected.progress}%
+              </span>
             </div>
+            {selectedRelation && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-lg bg-slate-50 p-2">
+                  <div className="text-[11px] text-slate-400">需求</div>
+                  <div className="mt-0.5 font-semibold text-ocean-950">
+                    {selectedRelation.requirements} 条
+                  </div>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-2">
+                  <div className="text-[11px] text-slate-400">Bug</div>
+                  <div className="mt-0.5 font-semibold text-ocean-950">
+                    {selectedRelation.bugs} 个
+                  </div>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-2">
+                  <div className="text-[11px] text-slate-400">仓库</div>
+                  <div className="mt-0.5 truncate font-semibold text-ocean-950">
+                    {selectedRelation.repo}
+                  </div>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-2">
+                  <div className="text-[11px] text-slate-400">环境</div>
+                  <div className="mt-0.5 truncate font-semibold text-ocean-950">
+                    {selectedRelation.env}
+                  </div>
+                </div>
+              </div>
+            )}
             <div>
               <div className="text-xs text-slate-400">团队成员</div>
               <div className="mt-1 flex -space-x-2">
@@ -349,10 +435,15 @@ export default function Projects() {
                 ))}
               </div>
             </div>
+            {selectedRelation && (
+              <div className="rounded-lg border border-ocean-100 bg-ocean-50/60 p-2 text-xs text-ocean-800">
+                关联文档：{selectedRelation.docs}
+              </div>
+            )}
             <ul className="space-y-1 text-xs text-slate-600">
               <li>□ 完成需求评审</li>
-              <li>□ 交付设计稿 v2</li>
-              <li>□ 开发联调验收</li>
+              <li>□ 核对资源与权限边界</li>
+              <li>□ 联调仓库、环境和通知事件</li>
             </ul>
           </div>
         )}

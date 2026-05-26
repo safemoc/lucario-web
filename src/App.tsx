@@ -17,6 +17,7 @@ const Departments = lazy(() => import("./pages/dashboard/Departments"));
 const Projects = lazy(() => import("./pages/dashboard/Projects"));
 const Knowledge = lazy(() => import("./pages/dashboard/Knowledge"));
 const Social = lazy(() => import("./pages/dashboard/Social"));
+const Agent = lazy(() => import("./pages/dashboard/Agent"));
 const Settings = lazy(() => import("./pages/dashboard/Settings"));
 
 function ProtectedRoute({
@@ -76,6 +77,14 @@ function ProtectedRoute({
           element={
             <Suspense fallback={<PageSkeleton />}>
               <Social />
+            </Suspense>
+          }
+        />
+        <Route
+          path="agent"
+          element={
+            <Suspense fallback={<PageSkeleton />}>
+              <Agent />
             </Suspense>
           }
         />

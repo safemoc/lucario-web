@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Bell,
   BookOpen,
+  Bot,
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
@@ -34,6 +35,7 @@ const navItems = [
   { path: "/projects", label: "项目管理", icon: Waves },
   { path: "/knowledge", label: "知识库", icon: BookOpen },
   { path: "/social", label: "社交圈", icon: MessageCircle },
+  { path: "/agent", label: "AI 助手", icon: Bot },
   { path: "/settings", label: "设置", icon: Settings },
 ] as const;
 

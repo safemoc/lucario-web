@@ -1,12 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Bar,
-  BarChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-} from "recharts";
 import { toast } from "sonner";
 import { Skeleton } from "../../components/Skeleton";
 import {
@@ -26,7 +19,6 @@ import {
   StatusBadge,
   company,
   department,
-  weekWorkHours,
 } from "./shared";
 
 function AccountCard() {
@@ -92,7 +84,7 @@ function AccountCard() {
             {greeting}，{user.name}
           </div>
           <div className="truncate text-[11px] text-slate-500">
-            今日还有 <span className="font-medium text-amber-600">{user.metrics.todos}</span> 项待办 · 加油 💪
+            今日待办 <span className="font-medium text-amber-600">{user.metrics.todos}</span> 项 · 协调申请 {user.metrics.requests} 条
           </div>
         </div>
       </div>
@@ -132,34 +124,6 @@ function AccountCard() {
         </div>
       </div>
 
-      <div className="mt-3 h-16">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={weekWorkHours} margin={{ top: 0, right: 0, left: -28, bottom: 0 }}>
-            <XAxis dataKey="day" tick={{ fontSize: 9 }} stroke="#94a3b8" />
-            <Tooltip contentStyle={{ fontSize: 11 }} />
-            <Bar dataKey="hours" fill="#0e3b63" radius={[3, 3, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {[
-          { label: "资产", value: user.metrics.assets, color: "text-ocean-700" },
-          { label: "项目", value: user.metrics.projects, color: "text-emerald-600" },
-          { label: "待办", value: user.metrics.todos, color: "text-amber-600" },
-          { label: "协调", value: user.metrics.requests, color: "text-rose-600" },
-        ].map((m) => (
-          <div
-            key={m.label}
-            className="rounded-lg bg-slate-50 px-2 py-2 text-center"
-          >
-            <div className={`text-lg font-bold leading-tight ${m.color}`}>
-              {m.value}
-            </div>
-            <div className="mt-0.5 text-xs text-slate-500">{m.label}</div>
-          </div>
-        ))}
-      </div>
     </Card>
   );
 }
@@ -330,110 +294,120 @@ function RequestsCard() {
   );
 }
 
-function CompanyStructureCard() {
+function CapabilityMapCard() {
+  const navigate = useNavigate();
+  const lines = [
+    {
+      name: "项目",
+      desc: "项目、需求、Bug、里程碑、文档",
+      status: "已展示",
+      tone: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+    },
+    {
+      name: "人员",
+      desc: "组织架构、成员档案、协作关系",
+      status: "已展示",
+      tone: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+    },
+    {
+      name: "资产",
+      desc: "实物、空间、数字、AI 与项目归属",
+      status: "强化中",
+      tone: "bg-amber-50 text-amber-700 ring-amber-100",
+    },
+    {
+      name: "社区",
+      desc: "内部动态、话题、项目进展",
+      status: "已展示",
+      tone: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+    },
+    {
+      name: "Agent",
+      desc: "代办规划、草稿生成、授权操作",
+      status: "新增入口",
+      tone: "bg-ocean-50 text-ocean-700 ring-ocean-100",
+    },
+  ];
+  const gaps = ["协同开发资源", "会议室冲突检测", "权限与审计", "AI 资源额度"];
+
   return (
     <Card
-      title="公司结构 · 我的部门"
-      subtitle={`${company.ceo.name} ${company.ceo.title} · 含 ${department.name} 详情`}
+      title="Lucario 落地总览"
+      subtitle="按开发意向核对当前原型覆盖度"
       action={
-        <button className="text-xs text-ocean-700 hover:text-ocean-900">
-          完整组织
+        <button
+          type="button"
+          onClick={() => navigate("/agent")}
+          className="text-xs text-ocean-700 hover:text-ocean-900"
+        >
+          查看 AI 助手
         </button>
       }
-      bodyClassName="flex flex-col gap-3"
+      bodyClassName="grid min-h-0 gap-3 lg:grid-cols-[1.25fr_0.75fr]"
     >
-      <div className="flex flex-col items-center">
-        <div className="flex flex-col items-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-ocean-900 to-ocean-700 text-sm font-bold text-white shadow-lg shadow-ocean-900/30">
-            {company.ceo.name}
-          </div>
-          <span className="mt-1 text-xs text-slate-500">
-            {company.ceo.title}
-          </span>
+      <div className="min-h-0 overflow-hidden">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-5">
+          {lines.map((line) => (
+            <div
+              key={line.name}
+              className="min-w-0 rounded-lg border border-slate-100 bg-slate-50/50 px-2 py-1.5"
+            >
+              <div className="truncate text-sm font-semibold text-ocean-950">
+                {line.name}
+              </div>
+              <span
+                className={`mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ring-1 ${line.tone}`}
+              >
+                {line.status}
+              </span>
+              <p className="mt-1 hidden truncate text-[11px] text-slate-400 xl:block">
+                {line.desc}
+              </p>
+            </div>
+          ))}
         </div>
 
-        <div className="my-1.5 h-4 w-px bg-slate-300" />
-        <div className="relative h-px w-full bg-slate-200" />
-
-        <div className="grid w-full grid-cols-3 gap-2 pt-2 sm:grid-cols-5">
-          {company.departments.map((d) => (
-            <div key={d.name} className="flex flex-col items-center">
-              <div className="-mt-2 h-2 w-px bg-slate-300" />
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-xl text-xs font-bold text-white shadow-md ${d.color} ${
-                  d.mine ? "ring-4 ring-ocean-200" : ""
-                }`}
-                title={d.head}
-              >
-                {d.head}
-              </div>
-              <div className="mt-1 text-center">
-                <div
-                  className={`text-xs font-medium ${
-                    d.mine ? "text-ocean-700" : "text-ocean-900"
-                  }`}
-                >
-                  {d.name}
-                </div>
-                <div className="text-[10px] text-slate-400">{d.count} 人</div>
-              </div>
-            </div>
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 rounded-lg bg-amber-50/60 px-2.5 py-1.5 text-xs text-amber-800 ring-1 ring-amber-100">
+          <span className="font-medium">继续补深</span>
+          {gaps.map((gap) => (
+            <span key={gap} className="rounded bg-white/70 px-1.5 py-0.5">
+              {gap}
+            </span>
           ))}
         </div>
       </div>
 
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
-
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex h-1.5 w-1.5 rounded-full bg-ocean-500" />
-            <span className="text-sm font-medium text-ocean-900">
+      <div className="flex min-h-0 flex-col gap-2 rounded-xl bg-white p-2.5 ring-1 ring-slate-100">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <div className="text-sm font-semibold text-ocean-950">
               {department.name}
-            </span>
-            <span className="text-xs text-slate-400">
-              · 负责人 {department.head}
-            </span>
+            </div>
+            <div className="text-[11px] text-slate-400">
+              负责人 {department.head} · {company.ceo.name} {company.ceo.title}
+            </div>
           </div>
-          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
             运转良好
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+
+        <div className="grid grid-cols-4 gap-1.5">
           {[
-            { label: "部门人数", value: department.members },
             { label: "在研项目", value: department.ongoingProjects },
-            { label: "管理资产", value: department.managedAssets },
+            { label: "管理资源", value: department.managedAssets },
             { label: "本周交付", value: department.weeklyDelivered },
+            { label: "待补岗位", value: department.vacancies },
           ].map((s) => (
-            <div
-              key={s.label}
-              className="rounded-lg border border-slate-100 bg-gradient-to-br from-white to-slate-50/50 px-2 py-2 text-center"
-            >
+            <div key={s.label} className="rounded-lg bg-slate-50 px-1.5 py-2 text-center">
               <div className="text-lg font-bold leading-tight text-ocean-900">
                 {s.value}
               </div>
-              <div className="mt-0.5 text-xs text-slate-500">{s.label}</div>
+              <div className="mt-0.5 truncate text-[11px] text-slate-500">
+                {s.label}
+              </div>
             </div>
           ))}
-        </div>
-        <div className="mt-2 flex items-center justify-between rounded-lg bg-amber-50/60 px-2.5 py-1.5 text-xs text-amber-800">
-          <span className="flex items-center gap-1.5">
-            <svg
-              className="h-3.5 w-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-            >
-              <path d="M12 9v4M12 17h.01" />
-              <circle cx="12" cy="12" r="10" />
-            </svg>
-            目前有 {department.vacancies} 个岗位空缺
-          </span>
-          <button className="font-medium text-amber-800 hover:text-amber-900">
-            查看 →
-          </button>
         </div>
       </div>
     </Card>
@@ -650,7 +624,7 @@ export default function Home() {
       </div>
 
       <div className="min-h-[240px] shrink-0 lg:col-span-8 lg:row-span-1 lg:min-h-0">
-        <CompanyStructureCard />
+        <CapabilityMapCard />
       </div>
       <div className="min-h-[320px] shrink-0 lg:col-span-4 lg:row-span-2 lg:min-h-0">
         <SocialCard />

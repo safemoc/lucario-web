@@ -22,22 +22,22 @@ import { Card, StatTile, statsRow4 } from "./shared";
 const pending = [
   {
     id: "R-9821",
-    item: "iPad Pro 13'' M4 + Pencil",
-    category: "平板",
+    item: "GPT Team 共享席位",
+    category: "AI 资源",
     submittedAt: "今天 09:14",
     step: 2,
     totalStep: 3,
-    currentStage: "部门负责人审批",
+    currentStage: "安全合规审批",
     priority: "高" as const,
   },
   {
     id: "R-9817",
-    item: "升降办公桌",
-    category: "办公家具",
+    item: "8 人会议室 · 周三 15:00",
+    category: "空间资源",
     submittedAt: "昨天",
     step: 1,
     totalStep: 3,
-    currentStage: "提交资产组",
+    currentStage: "冲突检测",
     priority: "中" as const,
   },
 ];
@@ -46,35 +46,67 @@ const available = [
   {
     id: "S-101",
     name: "MacBook Pro 14''",
-    category: "电脑",
+    category: "实物资产",
     icon: "💻",
     total: 8,
     available: 3,
+    owner: "行政资产部",
+    linked: "项目协同中台",
   },
   {
     id: "S-102",
-    name: "iPad Pro 13''",
-    category: "平板",
-    icon: "📱",
-    total: 6,
-    available: 1,
+    name: "8 人会议室 A3",
+    category: "空间资源",
+    icon: "🏢",
+    total: 10,
+    available: 4,
+    owner: "行政资产部",
+    linked: "可预订",
   },
   {
     id: "S-103",
-    name: "Sony WH-1000XM5",
-    category: "耳机",
-    icon: "🎧",
-    total: 10,
-    available: 7,
+    name: "dev-runner 测试环境",
+    category: "协同开发",
+    icon: "🧩",
+    total: 5,
+    available: 2,
+    owner: "工程部",
+    linked: "CI / 构建",
+  },
+  {
+    id: "S-104",
+    name: "GPT Team 共享席位",
+    category: "AI 资源",
+    icon: "🤖",
+    total: 12,
+    available: 2,
+    owner: "安全合规部",
+    linked: "需审批",
+  },
+  {
+    id: "S-105",
+    name: "设计素材库 license",
+    category: "数字资产",
+    icon: "🗂️",
+    total: 20,
+    available: 6,
+    owner: "研发平台部",
+    linked: "续费 6 月",
   },
 ];
 
 const categoryDist = [
-  { label: "电脑外设", value: 38 },
-  { label: "影音设备", value: 22 },
-  { label: "办公家具", value: 18 },
-  { label: "软件席位", value: 14 },
-  { label: "其他", value: 8 },
+  { label: "实物资产", value: 38 },
+  { label: "空间资源", value: 22 },
+  { label: "数字资产", value: 18 },
+  { label: "AI 资源", value: 14 },
+  { label: "协同开发", value: 8 },
+];
+
+const roomSchedule = [
+  { room: "A3 会议室", time: "15:00-16:00", project: "协同开发资源联动", state: "可预订" },
+  { room: "B1 评审间", time: "16:30-17:30", project: "AI Agent 操作助手", state: "有冲突" },
+  { room: "远程会议桥", time: "明天 10:00", project: "项目协同中台", state: "已锁定" },
 ];
 
 function StatusPill({ s }: { s: AssetStatus }) {
@@ -158,15 +190,15 @@ export default function Assets() {
   return (
     <div className="flex flex-col gap-3 lg:grid lg:h-full lg:min-h-0 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
       <div className={`${statsRow4} lg:col-span-12`}>
-        <StatTile label="持有资产" value={myAssets.length} tone="ocean" />
-        <StatTile label="申请中" value={pending.length} tone="amber" />
+        <StatTile label="我关联资源" value={myAssets.length} tone="ocean" />
+        <StatTile label="审批中" value={pending.length} hint="AI / 空间资源" tone="amber" />
         <StatTile
-          label="在用"
+          label="在用资源"
           value={inUse}
           hint={`待归还 ${myAssets.filter((a) => a.status === "待归还").length}`}
           tone="rose"
         />
-        <StatTile label="本月已批" value={5} tone="emerald" />
+        <StatTile label="资源池可用" value={available.reduce((s, a) => s + a.available, 0)} tone="emerald" />
       </div>
 
       <div className="min-h-[280px] lg:col-span-7 lg:row-span-1 lg:min-h-0">
@@ -228,7 +260,7 @@ export default function Assets() {
       </div>
 
       <div className="min-h-[200px] lg:col-span-5 lg:row-span-1 lg:min-h-0">
-        <Card title="资产类型分布" subtitle="全公司视角" bodyClassName="h-48 min-h-[160px]">
+        <Card title="资源版图" subtitle="实物、空间、数字、AI、协同开发" bodyClassName="h-48 min-h-[160px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={categoryDist} layout="vertical" margin={{ left: 8 }}>
               <XAxis type="number" hide />
@@ -246,28 +278,77 @@ export default function Assets() {
       </div>
 
       <div className="min-h-[200px] lg:col-span-7 lg:row-span-1 lg:min-h-0">
-        <Card title="申请进度" subtitle={`${pending.length} 条进行中`}>
+        <Card
+          title="申请与预订进度"
+          subtitle={`${pending.length} 条进行中`}
+          bodyClassName="overflow-y-auto pr-1"
+        >
           <ul className="space-y-2 overflow-y-auto pr-1">
             {pending.map((p) => (
               <li
                 key={p.id}
                 className="rounded-xl border border-slate-100 bg-white p-3 dark:border-slate-700 dark:bg-slate-800"
               >
-                <div className="text-sm font-medium text-ocean-950 dark:text-white">
-                  {p.item}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-ocean-950 dark:text-white">
+                      {p.item}
+                    </div>
+                    <div className="mt-1 text-xs text-slate-500">
+                      {p.category} · {p.currentStage} · {p.submittedAt}
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                    {p.step}/{p.totalStep}
+                  </span>
                 </div>
-                <div className="mt-1 text-xs text-slate-500">
-                  {p.currentStage} · {p.submittedAt}
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-amber-500"
+                    style={{ width: `${(p.step / p.totalStep) * 100}%` }}
+                  />
                 </div>
               </li>
             ))}
           </ul>
+          <div className="mt-3 border-t border-slate-100 pt-2">
+            <div className="mb-1.5 text-xs font-medium text-slate-500">
+              空间排期
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {roomSchedule.map((r) => (
+                <div key={`${r.room}-${r.time}`} className="rounded-lg bg-slate-50 px-2 py-1.5">
+                  <div className="truncate text-xs font-medium text-ocean-950">
+                    {r.room}
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-slate-400">{r.time}</div>
+                  <div className="mt-0.5 flex items-center justify-between gap-2">
+                    <span className="truncate text-[11px] text-slate-500">
+                      {r.project}
+                    </span>
+                    <span
+                      className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] ${
+                        r.state === "有冲突"
+                          ? "bg-rose-50 text-rose-700"
+                          : r.state === "已锁定"
+                            ? "bg-slate-200 text-slate-600"
+                            : "bg-emerald-50 text-emerald-700"
+                      }`}
+                    >
+                      {r.state}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </Card>
       </div>
 
       <div className="min-h-[240px] lg:col-span-5 lg:row-span-1 lg:min-h-0">
         <Card
-          title="可借用资源"
+          title="资源池"
+          subtitle="可领用、可预订、可审批"
           action={
             <input
               value={query}
@@ -284,7 +365,20 @@ export default function Assets() {
                 key={a.id}
                 className="rounded-xl border border-slate-100 p-2.5 dark:border-slate-700"
               >
-                <div className="text-xs font-medium">{a.icon} {a.name}</div>
+                <div className="flex items-start gap-2">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-lg">
+                    {a.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-xs font-medium">{a.name}</div>
+                    <div className="mt-0.5 text-[11px] text-slate-400">
+                      {a.category} · {a.owner}
+                    </div>
+                    <div className="mt-0.5 text-[11px] text-slate-500">
+                      可用 {a.available}/{a.total} · {a.linked}
+                    </div>
+                  </div>
+                </div>
                 <button
                   type="button"
                   disabled={a.available === 0}
