@@ -1,36 +1,244 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lucario
 
-## Getting Started
+> 一个面向公司内部使用的 **人员 + 项目 + 资产 + 内部社区 + AI Agent 一体化协同管理平台**。
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 一、项目开发意愿（Why）
+
+在日常工作中，公司内部往往同时存在多个项目，每个项目又会涉及：
+
+- 多名相关人员（负责人、开发、测试、产品……）
+- 不断变化的需求和开发计划
+- 持续累积的 Bug 与优化项
+- 散落在各处的文档（设计、接口、会议记录、变更记录）
+- 项目以外的"人"本身——团队成员、协作关系、日常动态
+
+与此同时，公司还存在大量**与项目协同强相关、却长期缺乏统一管理的资源**：
+
+- **协同开发资源**：代码仓库、CI/CD、测试环境、构建产物
+- **空间资源**：会议室预订、工位安排
+- **实物资产**：桌椅板凳、显示器、电脑、外设、办公设备
+- **数字化资产**：域名、服务器、license、设计素材、内部文档库
+- **AI 资源**：公共 / 共享的 AI 账号、API Key、调用额度、模型订阅
+
+这些信息常常分散在 Excel、聊天记录、网盘、便签、白板里，**缺少一个统一、可追溯、可协作的地方**——
+谁在用哪台机器、哪个 AI 账号是谁申请的、哪间会议室几点空闲、哪份文档是最新的，往往只能靠"问一下"。
+
+**Lucario 的目标**，就是把"项目 / 人 / 资产"集中管理起来，让公司内部的研发与协作有一个清晰的入口和数据沉淀，让"资源"也能像项目和需求一样被看见、被追踪、被协同使用。
+
+---
+
+## 二、最终宏愿（Vision）
+
+> "一个公司，一个 Lucario。"
+
+期望最终能够覆盖以下 **五条主线**：
+
+### 1. 项目侧（Project）
+
+围绕"一个项目从创建到推进"的完整生命周期：
+
+- **项目基础信息**：创建项目、项目简介、状态、起止时间
+- **项目负责人 / 成员**：项目负责人、参与人员、角色与权限
+- **项目内容**：项目背景、目标、范围、技术栈
+- **开发计划**：里程碑、迭代、排期
+- **需求管理（Requirements）**：已有需求的登记、状态流转、优先级
+- **Bug 管理（Issues）**：Bug 上报、分配、修复、回归
+- **项目文档（Docs）**：设计文档、接口文档、会议纪要、变更记录
+- **协同开发**：与代码仓库 / CI / 环境的串联，记录"项目 ↔ 仓库 ↔ 环境"的关系
+
+### 2. 人员侧（People）
+
+围绕"公司里的人"，让人员信息和日常协作可被看见：
+
+- **公司人员档案**：员工信息、组织架构、角色
+- **协作关系**：谁在做什么项目，谁负责什么模块
+- **入离职 / 岗位变动**：基础的人事变动记录与历史轨迹
+
+### 3. 资产侧（Assets）
+
+把公司"看得见"和"看不见"的资源都纳入统一管理，并和项目 / 人员打通：
+
+- **空间资源**
+  - 会议室管理：基本信息、容量、设备、**预订与冲突检测**
+  - 工位 / 区域：工位分配、调整记录
+- **实物资产（办公资产）**
+  - 桌椅板凳、显示器、电脑、外设、办公设备
+  - 资产编号、归属人、所在工位、领用 / 归还 / 报修 / 报废流程
+- **数字化资产**
+  - 域名、服务器、license、设计素材、内部资料库、共享盘
+  - 归属、有效期、续费提醒、访问权限
+- **AI 资源**
+  - 公共 / 共享 AI 账号、API Key、模型订阅
+  - 申领、归属、配额、使用记录、安全合规
+- **资产 ↔ 项目 ↔ 人员的关联**
+  - "这台机器现在被谁、用在哪个项目"
+  - "这个 AI 账号是哪个项目在用、当前用量多少"
+
+### 4. 社区侧（Moments / 公司内部朋友圈）
+
+让公司内部有一个"轻量、可浏览、可互动"的内部动态空间，所有公司人员都可以查看：
+
+- **动态发布**：图文 / 链接 / 项目进展 / 心得分享
+- **浏览与互动**：全员可见的动态流，支持点赞、评论、@同事
+- **话题 / 标签**：按团队、项目、兴趣分组（例如 `#项目-Lucario`、`#技术分享`、`#公司活动`）
+- **与项目 / 人员联动**：可以把动态关联到具体项目或人员，让"项目进展"和"日常分享"自然地融合
+- **可见范围控制**：默认全员可见，必要时支持按部门 / 项目限定可见范围
+- **基础治理**：举报 / 折叠 / 审核，避免内部社区噪音失控
+
+> 目标不是再做一个"微博"，而是给公司内部一个 **轻量、有归属感、和项目有关联** 的发声渠道。
+
+### 5. Agent 侧（AI Agent / 智能助手）
+
+在整个平台之上，提供一个 **贯穿全站的 AI 助手**，作为每个员工的"个人小助理"：
+
+- **日常对话**：自然语言聊天，回答问题、查资料、写文案、写邮件、写周报草稿
+- **代办规划（Todo Planning）**
+  - 根据对话或项目上下文，自动梳理 / 拆解 / 排期个人代办
+  - 与项目侧的需求、Bug、里程碑联动，形成"我的代办"视图
+- **快捷回复 / 草稿生成**
+  - 基于上下文给出回复建议（评论、动态、邮件、需求反馈等）
+  - 生成会议纪要草稿、变更说明草稿
+- **平台操作助手（Action Tools）**
+  - 在用户授权下，**直接在 Lucario 平台上完成简单操作**，例如：
+    - 创建 / 关闭一个 Bug 或需求
+    - 预订一间会议室
+    - 申请一个 AI 账号 / 资产领用
+    - 把一条动态发到朋友圈
+    - 生成项目周报并归档到项目文档
+- **上下文感知**：能感知"当前用户、当前项目、当前页面"，让回复和操作贴合实际场景
+- **安全与边界**
+  - 所有"会改动数据"的操作都需要二次确认
+  - 操作有审计日志，可回溯"是谁让 Agent 做了什么"
+  - 受统一权限体系约束，Agent 不会越权
+
+项目仍处于 **早期搭建阶段**，目前已具备：
+
+- 基础 Rust 后端骨架（Axum + Tokio）
+- 配置加载（`.env`）与日志系统（`tracing`）
+- 数据库连接池（PostgreSQL via SQLx）
+- 缓存连接池（Redis via deadpool-redis）
+- 基础路由模块划分
+
+后续将按"项目管理 → 人员管理 → 资产管理 → 内部社区（朋友圈） → AI Agent"的顺序逐步落地。
+
+---
+
+## 四、技术栈（Tech Stack）
+
+| 分类 | 选型 |
+| --- | --- |
+| 语言 | Rust (edition 2024) |
+| Web 框架 | [axum](https://github.com/tokio-rs/axum) |
+| 异步运行时 | [tokio](https://tokio.rs/) |
+| 数据库 | PostgreSQL（通过 [sqlx](https://github.com/launchbadge/sqlx)） |
+| 缓存 | Redis（通过 [deadpool-redis](https://github.com/bikeshedder/deadpool)） |
+| 日志 | tracing / tracing-subscriber / tracing-appender |
+| 配置 | dotenvy |
+| 错误处理 | anyhow / thiserror |
+
+详细依赖见 [`Cargo.toml`](./Cargo.toml)。
+
+---
+
+## 五、目录结构（Directory）
+
+```text
+lucario/
+├── src/
+│   ├── main.rs              # 程序入口
+│   ├── config/              # 配置加载（.env 等）
+│   ├── system/              # 基础设施（DB / Redis / 日志启动）
+│   ├── repository/          # 数据访问层（待补充）
+│   └── router/              # HTTP 路由层
+├── docs/                    # 项目文档目录
+├── logs/                    # 运行日志输出目录
+├── composer.yml             # 本地依赖服务（Postgres / Redis）
+├── .env.example             # 环境变量样例
+└── Cargo.toml
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 六、快速开始（Quick Start）
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. 启动依赖服务
 
-## Learn More
+```bash
+docker compose -f composer.yml.yml up -d
+```
 
-To learn more about Next.js, take a look at the following resources:
+将启动本地的 PostgreSQL（5432）与 Redis（6379）。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. 准备环境变量
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+cp .env.example .env
+```
 
-## Deploy on Vercel
+按需修改 `.env` 中的数据库 / Redis / 日志配置。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. 运行项目
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+cargo run
+```
+
+默认监听地址：`http://0.0.0.0:8080`（取决于 `.env` 中的 `APP_HOST` / `APP_PORT`）。
+
+---
+
+## 七、路线图（Roadmap）
+
+> 以下顺序为初步规划，会随实际推进调整。
+
+- [ ] 基础能力
+  - [ ] 用户认证与权限模型
+  - [ ] 统一响应 / 错误处理
+  - [ ] 数据库迁移方案
+- [ ] 项目管理
+  - [ ] 项目 CRUD、负责人指派
+  - [ ] 需求管理
+  - [ ] Bug 管理
+  - [ ] 开发计划 / 里程碑
+  - [ ] 项目文档
+- [ ] 人员管理
+  - [ ] 员工档案、组织架构
+  - [ ] 角色与权限
+  - [ ] 入离职 / 岗位变动记录
+- [ ] 资产管理
+  - [ ] 会议室管理与预订
+  - [ ] 工位 / 实物资产（桌椅、电脑、外设等）
+  - [ ] 数字化资产（域名 / 服务器 / license / 素材库）
+  - [ ] AI 账号 / API Key / 配额管理
+  - [ ] 资产与项目 / 人员的关联视图
+- [ ] 协同开发
+  - [ ] 代码仓库 / CI / 环境的关联
+  - [ ] 与项目、需求、Bug 的串联
+- [ ] 内部社区（公司朋友圈）
+  - [ ] 动态发布（图文 / 链接 / 进展）
+  - [ ] 全员动态流、点赞 / 评论 / @
+  - [ ] 话题与标签
+  - [ ] 与项目 / 人员的关联
+  - [ ] 可见范围控制与基础治理
+- [ ] 通知与提醒
+  - [ ] 站内消息中心
+  - [ ] @提醒、订阅 / 关注
+- [ ] AI Agent（智能助手）
+  - [ ] 日常对话与上下文感知
+  - [ ] 代办规划与"我的代办"视图
+  - [ ] 快捷回复 / 草稿生成（评论、邮件、周报、纪要）
+  - [ ] 平台操作工具（创建需求 / Bug、预订会议室、申请资产 等）
+  - [ ] 二次确认、审计日志、权限边界
+- [ ] 前端
+  - [ ] 管理后台 UI
+  - [ ] 朋友圈 / 动态流 UI
+  - [ ] Agent 对话面板
+
+---
+
+## 八、说明
+
+本项目主要服务于公司内部研发协作场景，目标是 **轻量、可演进、贴近真实工作流**，而不是去复刻某个大型 SaaS。功能会按真实需要逐步扩展。
+
