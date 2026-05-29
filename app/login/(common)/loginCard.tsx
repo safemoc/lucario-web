@@ -6,7 +6,7 @@ type LoginProps = {
     onSuccess: () => void;
 };
 
-export default function LoginCard(onSuccess: LoginProps) {
+export default function LoginCard({onSuccess}: LoginProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [remember, setRemember] = useState(true);

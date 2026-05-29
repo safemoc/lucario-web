@@ -1,17 +1,35 @@
 'use client'
 import React, {useState} from "react";
 import ShowPassword from "@/app/login/register/（common)/showPassword";
-
+import {NextResponse} from "next/server";
+import {useRouter} from "next/navigation";
 export default function RegisterPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [passwordAgain, setPasswordAgain] = useState("")
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
-
-    const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
+    const [invite, setInvite] = useState("")
+    const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
+        const router = useRouter()
         e.preventDefault();
+        setLoading(true)
+        let result = await fetch("/api/register", {
+            method: "POST",
+            body: JSON.stringify({
+                username: "",
+                email: email,
+                password: password,
+                real_name: "",
+                invite: invite
+            })
+        })
 
+        if (result) {
+
+            router.back()
+            setLoading(false)
+        }
     }
 
 
@@ -109,6 +127,73 @@ export default function RegisterPage() {
                                 autoComplete="current-password"
                                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pl-11 pr-11 text-ocean-950 placeholder:text-slate-400 outline-none transition focus:border-ocean-700 focus:ring-4 focus:ring-ocean-700/10"/>
                             <ShowPassword show={showPassword} onToggle={() => setShowPassword(!showPassword)}/>
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label htmlFor="password" className="text-sm font-medium text-ocean-900">
+                            再次输入密码
+                        </label>
+                        <div className="relative">
+                            <span
+                                className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                    <svg
+                                        className="h-5 w-5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                      <rect x="4" y="11" width="16" height="9" rx="2"/>
+                                      <path d="M8 11V8a4 4 0 018 0v3"/>
+                                    </svg>
+                                 </span>
+                            <input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                value={passwordAgain}
+                                onChange={(e) => setPasswordAgain(e.target.value)}
+                                placeholder="请再次输入密码"
+                                required
+                                autoComplete="current-password"
+                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pl-11 pr-11 text-ocean-950 placeholder:text-slate-400 outline-none transition focus:border-ocean-700 focus:ring-4 focus:ring-ocean-700/10"/>
+                            <ShowPassword show={showPassword} onToggle={() => setShowPassword(!showPassword)}/>
+                        </div>
+                    </div>
+
+
+                    <div className="space-y-1.5">
+                        <label htmlFor="invite" className="text-sm font-medium text-ocean-900">
+                            邀请码
+                        </label>
+                        <div className="relative">
+                            <span
+                                className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                {/*TODO: 邀请码前 svg 样式修改*/}
+                                <svg
+                                    className="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                      <rect x="4" y="11" width="16" height="9" rx="2"/>
+                                      <path d="M8 11V8a4 4 0 018 0v3"/>
+                                    </svg>
+                                 </span>
+                            <input
+                                id="invite"
+                                type={"text"}
+                                value={invite}
+                                onChange={(e) => setInvite(e.target.value)}
+                                placeholder="邀请码"
+                                required
+                                autoComplete="current-invite"
+                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pl-11 pr-11 text-ocean-950 placeholder:text-slate-400 outline-none transition focus:border-ocean-700 focus:ring-4 focus:ring-ocean-700/10"/>
                         </div>
                     </div>
                     <button
