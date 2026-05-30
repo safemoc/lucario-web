@@ -1,34 +1,42 @@
 'use client'
 import React, {useState} from "react";
-import ShowPassword from "@/app/login/register/（common)/showPassword";
-import {NextResponse} from "next/server";
+import ShowPassword from "@/app/ui/login/showPassword";
 import {useRouter} from "next/navigation";
+
 export default function RegisterPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [passwordAgain, setPasswordAgain] = useState("")
+    const [passwordErr, setPasswordErr] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
+    const router = useRouter()
     const [invite, setInvite] = useState("")
     const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
-        const router = useRouter()
         e.preventDefault();
+        if (password !== passwordAgain) {
+            setPasswordErr(
+                passwordAgain.length > 0 &&
+                password !== passwordAgain)
+            return
+        }
         setLoading(true)
-        let result = await fetch("/api/register", {
+        const result = await fetch("/api/login/register", {
             method: "POST",
             body: JSON.stringify({
-                username: "",
+                username: "hello",
                 email: email,
                 password: password,
-                real_name: "",
+                real_name: "123",
                 invite: invite
             })
         })
 
         if (result) {
-
-            router.back()
-            setLoading(false)
+            router.push("/login")
+            setTimeout(() => {
+                setLoading(false);
+            }, 900)
         }
     }
 
@@ -125,7 +133,7 @@ export default function RegisterPage() {
                                 placeholder="请输入密码"
                                 required
                                 autoComplete="current-password"
-                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pl-11 pr-11 text-ocean-950 placeholder:text-slate-400 outline-none transition focus:border-ocean-700 focus:ring-4 focus:ring-ocean-700/10"/>
+                                className={`w-full rounded-xl border ${passwordErr ? "border-red-500" : "border-slate-200"}  bg-white px-4 py-3 pl-11 pr-11 text-ocean-950 placeholder:text-slate-400 outline-none transition focus:border-ocean-700 focus:ring-4 focus:ring-ocean-700/10`}/>
                             <ShowPassword show={showPassword} onToggle={() => setShowPassword(!showPassword)}/>
                         </div>
                     </div>
@@ -158,7 +166,7 @@ export default function RegisterPage() {
                                 placeholder="请再次输入密码"
                                 required
                                 autoComplete="current-password"
-                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pl-11 pr-11 text-ocean-950 placeholder:text-slate-400 outline-none transition focus:border-ocean-700 focus:ring-4 focus:ring-ocean-700/10"/>
+                                className={`w-full rounded-xl border ${passwordErr ? "border-red-500" : "border-slate-200"} bg-white px-4 py-3 pl-11 pr-11 text-ocean-950 placeholder:text-slate-400 outline-none transition focus:border-ocean-700 focus:ring-4 focus:ring-ocean-700/10`}/>
                             <ShowPassword show={showPassword} onToggle={() => setShowPassword(!showPassword)}/>
                         </div>
                     </div>

@@ -3,19 +3,13 @@ import prisma from "@/lib/prisma"
 
 export async function POST(req: NextRequest) {
 
-    type User = {
-        name: string,
-        password: string,
-        email: string,
-    }
-
     const body = await req.json()
 
     const user = await prisma.user.create({
         data: {
-            username: body.name,
+            username: body.username,
             password: body.password,
-            real_name: body.name,
+            real_name: body.real_name,
             email: body.email,
             avatar: "https://github.com/lyke-dev.png",
         },

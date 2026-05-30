@@ -1,8 +1,5 @@
 import "@/app/ui/global.css"
 import React from "react";
-import {Card, MottoCard} from "@/app/(common)/cards";
-import SystemOperationStatus from "@/app/(common)/system";
-import LoginCard from "@/app/login/(common)/loginCard";
 
 export default function RootLayout({children,}: { children: React.ReactNode; }) {
     return (
@@ -65,9 +62,7 @@ export default function RootLayout({children,}: { children: React.ReactNode; }) 
                     />
                 </svg>
 
-
                 {children}
-
 
             </div>
 

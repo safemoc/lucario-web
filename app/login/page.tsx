@@ -1,6 +1,6 @@
-import LoginCard from "@/app/login/(common)/loginCard";
-import SystemOperationStatus from "@/app/(common)/system";
-import {MottoCard, Card} from "@/app/(common)/cards";
+import LoginCard from "@/app/ui/login/loginCard";
+import SystemOperationStatus from "@/app/ui/system";
+import {MottoCard, SystemCard} from "@/app/ui/cards";
 
 
 export default function Login() {
@@ -8,7 +8,7 @@ export default function Login() {
         <>
             <div className={"relative flex min-h-screen flex-col lg:flex-row"}>
                 <section className={"hidden lg:flex lg:w-3/5 flex-col justify-between p-12 xl:p-16"}>
-                    <Card/>
+                    <SystemCard/>
                     <div className={"max-w-xl space-y-7"}>
                         <h1 className={"text-5xl font-bold leading-tight"}>
                             欢迎回来

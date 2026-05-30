@@ -2,25 +2,34 @@
 import React, {useState} from "react";
 import Link from "next/link";
 
-type LoginProps = {
-    onSuccess: () => void;
-};
 
-export default function LoginCard({onSuccess}: LoginProps) {
+import {useRouter} from "next/navigation";
+
+export default function LoginCard() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [remember, setRemember] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-
-
-    const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
+    const route = useRouter();
+    const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
+        const result = await fetch("/api/login", {
+            method: "POST",
+            body: JSON.stringify({
+                email,
+                password,
+            })
+        })
+
+
         setTimeout(() => {
             setLoading(false);
-            onSuccess();
-        }, 900)
+            if (result) {
+                route.push('/dashboard')
+            }
+        }, 2000)
 
     }
 
