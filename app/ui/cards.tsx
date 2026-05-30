@@ -44,10 +44,8 @@ type props = {
 export function SystemCard({fold, setFold}: props) {
     return (
         <>
-            <div className={"flex items-center gap-3"}>
-                <div onClick={
-                    setFold
-                }
+            <div className={"flex items-center gap-3 border border-white/15 bg-white/10 p-5 text-white"}>
+                <div onClick={setFold}
                      className={"flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20 backdrop-blur"}>
                     <svg
                         viewBox="0 0 24 24"
