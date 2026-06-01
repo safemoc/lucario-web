@@ -37,14 +37,14 @@ export function MottoCard() {
 
 
 type props = {
-    fold?: boolean,
+    unfold?: boolean,
     setFold?: () => void
 }
 
-export function SystemCard({fold, setFold}: props) {
+export function SystemCard({unfold, setFold}: props) {
     return (
         <>
-            <div className={"flex items-center gap-3 border border-white/15 bg-white/10 p-5 text-white"}>
+            <div className={"flex items-center gap-3 border border-white/15 bg-white/10 p-5 text-white rounded-xl"}>
                 <div onClick={setFold}
                      className={"flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20 backdrop-blur"}>
                     <svg
@@ -61,7 +61,7 @@ export function SystemCard({fold, setFold}: props) {
                         <path d="M2 7c2.5-2 5 2 7.5 0S14.5 5 17 7s5-2 5-2"/>
                     </svg>
                 </div>
-                {fold && <span className="text-xl font-semibold tracking-wide">Lucario</span>}
+                {unfold && <span className="text-xl font-semibold tracking-wide">Lucario</span>}
             </div>
         </>
     )
