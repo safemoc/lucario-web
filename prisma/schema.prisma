@@ -42,3 +42,14 @@ model Motto {
 
   @@map("motto")
 }
+
+model Todos {
+  id      String @id @default(uuid(7))
+  user_id String
+  status  String
+
+  is_enable  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  is_deleted Boolean  @default(false)
+}
