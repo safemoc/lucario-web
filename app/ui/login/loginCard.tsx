@@ -3,36 +3,12 @@ import React, {useState} from "react";
 import Link from "next/link";
 
 
-import {useRouter} from "next/navigation";
+import {loginAction} from "@/app/login/actions";
 
 export default function LoginCard() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [remember, setRemember] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const route = useRouter();
-    const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setLoading(true);
-        const result = await fetch("/api/login", {
-            method: "POST",
-            body: JSON.stringify({
-                email,
-                password,
-            })
-        })
-
-
-        setTimeout(() => {
-            setLoading(false);
-            if (result) {
-                route.push('/dashboard')
-            }
-        }, 2000)
-
-    }
-
     return (
         <section
             className="flex flex-1 items-center justify-center px-6 py-12 sm:px-12 lg:w-2/5 lg:justify-end lg:pr-16 xl:pr-24">
@@ -67,7 +43,11 @@ export default function LoginCard() {
                     </p>
                 </header>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form
+                    action={loginAction}
+                    className="space-y-5"
+                    onSubmit={() => setLoading(true)}
+                >
                     <div className="space-y-1.5">
                         <label
                             htmlFor="email"
@@ -94,8 +74,7 @@ export default function LoginCard() {
                             <input
                                 id="email"
                                 type="text"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                name="email"
                                 placeholder="you@example.com"
                                 required
                                 autoComplete="username"
@@ -130,8 +109,7 @@ export default function LoginCard() {
                             <input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                name="password"
                                 placeholder="请输入密码"
                                 required
                                 autoComplete="current-password"

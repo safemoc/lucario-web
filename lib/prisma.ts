@@ -1,7 +1,7 @@
 import {PrismaClient} from "./generated/prisma/client"
 import {PrismaPg} from "@prisma/adapter-pg";
 import {env} from "prisma/config";
-
+import {Pool} from "pg";
 
 
 const DATABASE_URL =
@@ -11,15 +11,15 @@ const DATABASE_URL =
     `${env("DB_HOST")}:` +
     `${env("DB_PORT")}/` +
     `${env("DB_NAME")}`;
-// 创建连接池（推荐）
-// const pool = new Pool({
-//     connectionString: (DATABASE_URL)!,
-//     max: 10,
-//     idleTimeoutMillis: 30000,
-// })
+
+const pool = new Pool({
+    connectionString: DATABASE_URL,
+    max: Number(env("DB_MAX_CONNECT")),
+    min: Number(env("DB_MIN_CONNECT")),
+})
 
 
-const adapter = new PrismaPg(DATABASE_URL);
+const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({adapter})
 export default prisma

@@ -6,13 +6,13 @@ import Link from "next/link";
 
 const navItems = [
     {path: "/dashboard", label: "个人看板", icon: LayoutDashboard},
-    {path: "/assets", label: "资产申请", icon: Wallet},
-    {path: "/departments", label: "部门管理", icon: Users},
-    {path: "/projects", label: "项目管理", icon: Waves},
-    {path: "/knowledge", label: "知识库", icon: BookOpen},
-    {path: "/social", label: "社交圈", icon: MessageCircle},
-    {path: "/agent", label: "AI 助手", icon: Bot},
-    {path: "/settings", label: "设置", icon: Settings},
+    {path: "/dashboard/assets", label: "资产申请", icon: Wallet},
+    {path: "/dashboard/departments", label: "部门管理", icon: Users},
+    {path: "/dashboard/projects", label: "项目管理", icon: Waves},
+    {path: "/dashboard/knowledge", label: "知识库", icon: BookOpen},
+    {path: "/dashboard/social", label: "社交圈", icon: MessageCircle},
+    {path: "/dashboard/agents", label: "AI 助手", icon: Bot},
+    {path: "/dashboard/settings", label: "设置", icon: Settings},
 ] as const;
 export default function SideNav() {
     const [unfold, setFold] = useState(true);

@@ -24,8 +24,7 @@ export default function Login() {
 
                     <SystemOperationStatus/>
                 </section>
-                <section><div></div></section>
-                <LoginCard/>
+               <LoginCard/>
 
             </div>
 

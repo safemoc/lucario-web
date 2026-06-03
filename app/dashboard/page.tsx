@@ -1,5 +1,9 @@
+import Todo from "@/app/ui/dashboard/users/todo";
+
 export default function Dashboard() {
     return (
-        <>Hello Lucario!!</>
+        <>
+            <Todo/>
+            Hello Lucario!!</>
     )
 }
