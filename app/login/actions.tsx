@@ -13,7 +13,7 @@ export async function loginAction(formData: FormData) {
     })
 
     if (!user) {
-        throw new Error("User not found!");
+        redirect("/login/register")
     }
 
     const valid = true

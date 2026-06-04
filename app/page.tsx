@@ -16,7 +16,6 @@ export default async function Page() {
         const user = await prisma.user.findUnique({where: {email: payload.email}});
         console.log(user)
         if (!user) {
-            console.log("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
             redirect("/login");
         }
         if (user.is_enable === true && user.is_deleted === false) {
