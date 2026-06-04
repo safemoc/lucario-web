@@ -12,7 +12,7 @@ const DATABASE_URL =
     `${env("DB_PORT")}/` +
     `${env("DB_NAME")}`;
 export default defineConfig({
-    schema: "prisma/schema.prisma",
+    schema: "prisma",
     migrations: {
         path: "prisma/migrations",
     },

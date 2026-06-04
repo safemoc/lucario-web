@@ -1,3 +1,4 @@
+
 export default  function Todo(){
     return (
         <>
@@ -5,10 +6,19 @@ export default  function Todo(){
             <header>
                 我的代办
             </header>
-            <ul>
-                <li></li>
-            </ul>
+
         </div>
         </>
     )
+}
+
+
+
+export function addTodo() {
+
+    return (<>
+        <button onClick={}>
+
+        </button>
+    </>)
 }

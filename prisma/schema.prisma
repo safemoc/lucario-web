@@ -12,46 +12,13 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id         String   @id @default(uuid(7)) @db.Uuid
-  username   String
-  email      String   @unique
-  password   String
-  real_name  String
-  avatar     String
-  is_enable  Boolean  @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  is_deleted Boolean  @default(false)
-
-  @@map("users")
+enum TodoStatus {
+  PENDING
+  COMPLETED
 }
 
-// model Motto {
-//   id         String   @id @default(uuid(7)) @db.Uuid
-//   context    String   @unique
-//   author     String?
-//   user_id    String   @db.Uuid
-//   is_enable  Boolean  @default(true)
-//   created_at DateTime @default(now())
-//   updated_at DateTime @updatedAt
-//   is_deleted Boolean  @default(false)
-//
-//   user User @relation(fields: [user_id], references: [id])
-//
-//   @@map("motto")
-// }
-
-model Todos {
-  id      String @id @default(uuid(7)) @db.Uuid
-  user_id String @db.Uuid
-  status  String
-  context String
-
-  is_enable  Boolean  @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  is_deleted Boolean  @default(false)
-
-  @@map("todos")
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
 }

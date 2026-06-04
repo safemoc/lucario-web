@@ -17,13 +17,15 @@ export async function todoList() {
     const todos = await prisma.todos.findMany({where: {user_id: user.id}});
 
     return (
-        <>
+        <ul>
             ${
             todos.map((todo) => {
                     <div>{}</div>
                 }
             )
         }
-        </>
+            <li></li>
+        </ul>
+
     )
 }

@@ -1,0 +1,16 @@
+model Todos {
+  id          String     @id @default(uuid(7)) @db.Uuid
+  user_id     String     @db.Uuid
+  user        User       @relation(fields: [user_id], references: [id])
+  title       String
+  description String?
+  status      TodoStatus @default(PENDING)
+  priority    Priority   @default(MEDIUM)
+  due_at      DateTime?
+  is_enable   Boolean    @default(true)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  is_deleted  Boolean    @default(false)
+
+  @@map("todos")
+}

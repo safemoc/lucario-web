@@ -1,4 +1,6 @@
-import {SignJWT, jwtVerify} from "jose";
+import {jwtVerify, SignJWT} from "jose";
+import {cookies} from "next/headers";
+import prisma from "@/lib/prisma";
 
 const secret = new TextEncoder().encode(process.env.SECRET);
 
@@ -18,4 +20,14 @@ export async function createToken(user: UserPayload) {
 export async function verifyToken(token: string): Promise<UserPayload> {
     const {payload} = await jwtVerify<UserPayload>(token, secret);
     return payload;
+}
+
+export async function getCurrentUser() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token) {
+        return null;
+    }
+    const user = await verifyToken(token);
+    return prisma.user.findUnique({where: {id: user.id}});
 }
