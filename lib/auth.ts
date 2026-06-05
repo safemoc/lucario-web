@@ -29,5 +29,11 @@ export async function getCurrentUser() {
         return null;
     }
     const user = await verifyToken(token);
-    return prisma.user.findUnique({where: {id: user.id}});
+
+
+    const result = prisma.user.findUnique({where: {id: user.id}});
+    if (!result) {
+        throw new Error('Unauthorized')
+    }
+    return result
 }
