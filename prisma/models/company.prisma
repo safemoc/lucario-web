@@ -1,0 +1,14 @@
+model Company {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  name       String
+  code       String   @unique
+  logo       String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  is_enable  Boolean  @default(true)
+  is_deleted Boolean  @default(false)
+
+  departments Department[]
+  users       User[]
+  roles       Role[]
+}

@@ -1,15 +1,35 @@
 model User {
-  id         String   @id @default(uuid(7)) @db.Uuid
-  username   String
-  email      String   @unique
-  password   String
-  real_name  String
-  avatar     String
-  is_enable  Boolean  @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  is_deleted Boolean  @default(false)
-  todos      Todos[]
+  id              String      @id @default(uuid(7)) @db.Uuid
+  username        String
+  email           String      @unique
+  password        String
+  real_name       String
+  avatar          String
+  phone           String?
+  position        String?
+  employee_no     String?
+  hire_date       DateTime?
+  // status          UserStatus  @default(ACTIVE)
+  department_id   String?     @db.Uuid
+  department_name String?
+  role_id         String?     @db.Uuid
+  role_name       String?
+  company_id      String      @db.Uuid
+  company_name    String?
+  is_enable       Boolean     @default(true)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  is_deleted      Boolean     @default(false)
+  company         Company     @relation(fields: [company_id], references: [id])
+  role            Role?       @relation(fields: [role_id], references: [id])
+  department      Department? @relation(fields: [department_id], references: [id])
+
+  @@index([company_id])
+  @@index([department_id])
+  @@index([role_id])
+
+
+  todos Todos[]
 
   @@map("users")
 }

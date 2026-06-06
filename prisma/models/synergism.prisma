@@ -1,0 +1,7 @@
+model Synergism {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  apply_user_id       String   @db.Uuid
+  coordinate_user_ids String[]
+
+  @@map("syncgism")
+}

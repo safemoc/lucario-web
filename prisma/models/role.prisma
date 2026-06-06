@@ -1,0 +1,14 @@
+model Role {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  company_id  String   @db.Uuid
+  company     Company  @relation(fields: [company_id], references: [id])
+  name        String
+  code        String   @unique
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  is_enable   Boolean  @default(true)
+  is_deleted  Boolean  @default(false)
+
+  users User[]
+}

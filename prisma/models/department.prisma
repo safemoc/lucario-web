@@ -1,0 +1,22 @@
+model Department {
+  id         String  @id @default(uuid(7)) @db.Uuid
+  company_id String  @db.Uuid
+  company    Company @relation(fields: [company_id], references: [id])
+  name       String
+
+  code       String?
+  parent_id  String?      @db.Uuid
+  parent     Department?  @relation("DepartmentTree", fields: [parent_id], references: [id])
+  leader_id  String?      @db.Uuid
+  children   Department[] @relation("DepartmentTree")
+  sort       Int          @default(0)
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  is_enable  Boolean      @default(true)
+  is_deleted Boolean      @default(false)
+
+  @@index([company_id])
+  @@index([parent_id])
+
+  users User[]
+}
