@@ -11,4 +11,6 @@ model Company {
   departments Department[]
   users       User[]
   roles       Role[]
+  @@map("company")
+
 }

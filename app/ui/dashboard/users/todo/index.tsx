@@ -22,7 +22,7 @@ export default async function Todo() {
             </div>
 
 
-            <main className={"flex-1"}>
+            <div className={"flex-1"}>
                 <ul>
                     {todos.map(
                         (todo)=>{
@@ -33,7 +33,7 @@ export default async function Todo() {
                         }
                     )}
                 </ul>
-            </main>
+            </div>
         </section>
     )
 }

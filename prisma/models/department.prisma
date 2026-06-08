@@ -19,4 +19,6 @@ model Department {
   @@index([parent_id])
 
   users User[]
+
+  @@map("department")
 }
