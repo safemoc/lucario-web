@@ -93,7 +93,7 @@
 ### 已完成
 
 - [x] Next.js 工程初始化（App Router、Tailwind、TypeScript、ESLint）
-- [x] 本地依赖编排：PostgreSQL + Redis（[`composer.yml`](./composer.yml)）
+- [x] 本地依赖编排：PostgreSQL + Redis（[`composer.yml`](compose.yml)）
 - [x] Prisma 数据层：`User`、`Motto` 模型及首次迁移
 - [x] 首页入口（`/``）与登录/注册流程 UI
 - [x] 登录：Server Action + JWT Cookie（`jose`）
@@ -172,7 +172,7 @@ pnpm install
 ### 2. 启动依赖服务
 
 ```bash
-docker compose -f composer.yml up -d
+docker compose -f compose.yml up -d
 ```
 
 将启动本地 PostgreSQL（`5432`）与 Redis（`6379`）。默认数据库：`lucario`，用户/密码：`root` / `root`。
